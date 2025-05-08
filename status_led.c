@@ -28,6 +28,7 @@
 //#include "glob_def.h"
 //#include "binary.h"
 #include "status_led.h"
+#include "uart.h"
 
 
 /*****************************    Defines    *******************************/
@@ -36,6 +37,7 @@
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
+extern QueueHandle_t adc_q;
 
 /*****************************   Functions   *******************************/
 
@@ -60,14 +62,23 @@ void status_led_init(void)
 
 void status_led_task(void *pvParameters)
 {
-	
 	status_led_init();
+
+	INT16U adc_val;
 
 	while(1)
 	{
 		// Toggle status led
 	    GPIO_PORTD_DATA_R ^= 0x40;
-		vTaskDelay(500 / portTICK_RATE_MS); // wait 500 ms.
+
+	    xQueueReceive(adc_q, &adc_val, portMAX_DELAY);
+
+
+	    uart0_put_q('-');
+
+
+
+        vTaskDelay(500 / portTICK_RATE_MS); // wait 500 ms.
 	}
 }
 

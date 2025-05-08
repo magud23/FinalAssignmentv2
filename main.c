@@ -13,6 +13,7 @@
 #include "status_led.h"
 #include "queue.h"
 #include "uart.h"
+#include "adcRTOS.h"
 
 #define USERTASK_STACK_SIZE configMINIMAL_STACK_SIZE
 #define IDLE_PRIO 0
@@ -41,6 +42,7 @@ static void setupHardware(void)
 
 extern QueueHandle_t uart_rx_q;
 extern QueueHandle_t uart_tx_q;
+extern QueueHandle_t adc_q;
 
 
 int main(void)
@@ -49,11 +51,13 @@ int main(void)
 
     uart_rx_q = xQueueCreate(128, sizeof(INT8U));
     uart_tx_q = xQueueCreate(128, sizeof(INT8U));
+    adc_q = xQueueCreate(1, sizeof(INT16U));
 
     if( (uart_rx_q != NULL) && (uart_tx_q != NULL) ){
            xTaskCreate( status_led_task, "Status_led", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( uart_rx_task, "Uart rx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( uart_tx_task, "Uart tx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
+           xTaskCreate( adc_task, "ADC (potmeter)", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            vTaskStartScheduler();
     }
 
