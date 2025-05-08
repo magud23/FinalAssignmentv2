@@ -11,7 +11,6 @@
 #include "systick_frt.h"
 #include "task.h"
 #include "status_led.h"
-
 #include "queue.h"
 #include "uart.h"
 
