@@ -1,9 +1,22 @@
 
+/*****************************************************************************
+* University of Southern Denmark
+* Embedded C Programming (ECP)
+*
+* PROJECT....: FINAL ASSIGNEMNT
+*
+* DESCRIPTION: Main file
+*
+* Change Log:
+******************************************************************************
+* Date    Id    Change
+* YYMMDD
+* --------------------
+* 080525  MKG    project created.
+*
+*****************************************************************************/
 
-/**
- * main.c
- */
-
+/***************************** Include files *******************************/
 #include <stdint.h>
 #include "FreeRTOS.h"
 #include "tm4c123gh6pm.h"
@@ -14,7 +27,14 @@
 #include "queue.h"
 #include "uart.h"
 #include "adcRTOS.h"
+#include "leds.h"
 
+/*****************************    Defines    *******************************/
+/*****************************   Constants   *******************************/
+/*****************************   Variables   *******************************/
+
+
+/*****************************   Functions   *******************************/
 #define USERTASK_STACK_SIZE configMINIMAL_STACK_SIZE
 #define IDLE_PRIO 0
 #define LOW_PRIO  1
@@ -58,6 +78,7 @@ int main(void)
            xTaskCreate( uart_rx_task, "Uart rx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( uart_tx_task, "Uart tx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( adc_task, "ADC (potmeter)", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
+           xTaskCreate( leds_task, "ADC (potmeter)", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            vTaskStartScheduler();
     }
 

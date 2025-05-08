@@ -25,53 +25,60 @@
 #include "queue.h"
 #include "semphr.h"
 #include "emp_type.h"
-#include "status_led.h"
-#include "uart.h"
+#include "adcRTOS.h"
 
 
 /*****************************    Defines    *******************************/
-#define PF0		0		// Bit 0
+#define RED_MASK 0x02
+#define YELLOW_MASK 0x04
+#define GREEN_MASK 0x08
 
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
-
+extern QueueHandle_t adc_q;
 
 /*****************************   Functions   *******************************/
 
-void status_led_init(void)
+void leds_init(void)
 /*****************************************************************************
-*   Input    : 	-
-*   Output   : 	-
-*   Function : 	
+*   Input    :  -
+*   Output   :  -
+*   Function : Init LEDs
 *****************************************************************************/
 {
   INT8S dummy;
   // Enable the GPIO port that is used for the on-board LED.
-  SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOD;
+  SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOF;
 
   // Do a dummy read to insert a few cycles after enabling the peripheral.
   dummy = SYSCTL_RCGC2_R;
 
-  GPIO_PORTD_DIR_R |= 0x40;
-  GPIO_PORTD_DEN_R |= 0x40;
+  GPIO_PORTF_DIR_R |= RED_MASK | YELLOW_MASK | GREEN_MASK;
+  GPIO_PORTF_DEN_R |= RED_MASK | YELLOW_MASK | GREEN_MASK;
+
 }
 
 
-void status_led_task(void *pvParameters)
+void leds_task(void *pvParameters)
 {
-	status_led_init();
+  INT16U adc_value;
+  portTickType delay;
 
-	while(1)
-	{
-		// Toggle status led
-	    GPIO_PORTD_DATA_R ^= 0x40;
+  leds_init();
 
-	    uart0_put_q('-');
+  while(1)
+  {
+    // Toggle red led
 
-        vTaskDelay(500 / portTICK_RATE_MS); // wait 500 ms.
-	}
+    GPIO_PORTF_DATA_R ^= RED_MASK;
+    xQueueReceive(adc_q, &adc_value, 0);
+    delay = 1000 - adc_value / 5;
+    vTaskDelay( delay / portTICK_RATE_MS); // wait 100-1000 ms. (200-1000)
+  }
 }
+
+
 
 
 /****************************** End Of Module *******************************/
