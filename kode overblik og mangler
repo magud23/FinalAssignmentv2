@@ -1,0 +1,12 @@
+Kode vi har:
+LED
+ACD
+
+Kode der skal ændres:
+Keypad: rtcs til rtos
+Buttons: rtcs til rtos
+LCD: skal vise de rigtige ting. 
+
+Kode der skal skrives:
+Elevator
+Password
