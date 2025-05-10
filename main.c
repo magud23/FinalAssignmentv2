@@ -82,7 +82,7 @@ static void setupHardware(void)
   init_systick();
   status_led_init();
   uart0_init(BAUDRATE,DATABITS,STOPBITS, PARITY);
-  void init_gpio();
+  init_gpio();
 
 }
 
@@ -137,7 +137,7 @@ int main(void)
            xTaskCreate( adc_task, "ADC (potmeter)", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( leds_task, "LEDS", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( lcd_task, "LCD driver", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
-//           xTaskCreate( elevator_task, "Elevator", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
+           xTaskCreate( elevator_task, "Elevator", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
 
            vTaskStartScheduler();
     }
