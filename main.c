@@ -28,6 +28,7 @@
 //Course
 #include "tm4c123gh6pm.h"
 #include "emp_type.h"
+#include "gpio.h"
 
 //Modules
 #include "glob_def.h"
@@ -36,7 +37,7 @@
 #include "adcRTOS.h"
 #include "leds.h"
 #include "lcd.h"
-
+#include "elevator.h"
 
 
 /*****************************    Defines    *******************************/
@@ -81,6 +82,7 @@ static void setupHardware(void)
   init_systick();
   status_led_init();
   uart0_init(BAUDRATE,DATABITS,STOPBITS, PARITY);
+  void init_gpio();
 
 }
 
@@ -91,20 +93,19 @@ static INT16U setupInterTaskCommunication(void)
 *   Function :
 *****************************************************************************/
 {
-     INT16U tmp = TRUE;
-     uart_rx_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
-     uart_tx_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
-     tmp = (uart_rx_q != NULL) && (uart_tx_q != NULL);
+    INT16U tmp = TRUE;
+    uart_rx_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
+    uart_tx_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
+    tmp = (uart_rx_q != NULL) && (uart_tx_q != NULL);
 
-     adc_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
-     tmp = tmp && ( adc_q != NULL);
+    adc_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
+    tmp = tmp && ( adc_q != NULL);
 
-     xQueue_lcd = xQueueCreate( QUEUE_LEN , sizeof( INT8U ));
-     tmp = tmp && ( xQueue_lcd != NULL);
+    xQueue_lcd = xQueueCreate( QUEUE_LEN , sizeof( INT8U ));
+    tmp = tmp && ( xQueue_lcd != NULL);
 
-     xSemaphore_lcd = xSemaphoreCreateMutex();
-     tmp = tmp && ( xSemaphore_lcd != NULL);
-
+    xSemaphore_lcd = xSemaphoreCreateMutex();
+    tmp = tmp && ( xSemaphore_lcd != NULL);
 
      return tmp;
 }
@@ -114,13 +115,29 @@ static INT16U setupInterTaskCommunication(void)
 int main(void)
 {
     setupHardware();
-    if(setupInterTaskCommunication()){
+
+    INT16U tmp = TRUE;
+    uart_rx_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
+    uart_tx_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
+    tmp = (uart_rx_q != NULL) && (uart_tx_q != NULL);
+
+    adc_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
+    tmp = tmp && ( adc_q != NULL);
+
+    xQueue_lcd = xQueueCreate( QUEUE_LEN , sizeof( INT8U ));
+    tmp = tmp && ( xQueue_lcd != NULL);
+
+    xSemaphore_lcd = xSemaphoreCreateMutex();
+    tmp = tmp && ( xSemaphore_lcd != NULL);
+
+    if(tmp){
            xTaskCreate( status_led_task, "Status_led", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( uart_rx_task, "Uart rx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( uart_tx_task, "Uart tx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( adc_task, "ADC (potmeter)", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( leds_task, "LEDS", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( lcd_task, "LCD driver", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
+//           xTaskCreate( elevator_task, "Elevator", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
 
            vTaskStartScheduler();
     }

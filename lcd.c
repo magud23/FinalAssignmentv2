@@ -35,6 +35,8 @@
 /*****************************    Defines    *******************************/
 
 #define QUEUE_LEN   128
+#define GPIO_PORTC_DATA_MASKED (*((volatile uint32_t *)(0x40006000 + (0xF0 << 2))))
+
 
 
 QueueHandle_t xQueue_lcd;
@@ -119,23 +121,25 @@ void wr_ctrl_LCD_low( INT8U Ch )
   INT8U temp;
   volatile int i;
 
-  temp = GPIO_PORTC_DATA_R & LSB4;
-  temp  = temp | ((Ch & LSB4) << 4); // COPY 4LSB to 4MSB
-  GPIO_PORTC_DATA_R  = temp;        //put data on LCD D7-4
-  for( i=0; i<1000; i )
-	  i++;
+  temp = GPIO_PORTC_DATA_R;
+  temp  = ((Ch & LSB4) << 4); // set any LSB4 as MSB4 not already set
+  GPIO_PORTC_DATA_R  = temp & MSB4;        //put data on LCD D7-4
+
+
+//  for( i=0; i<1000; i )
+//	  i++;
 
   GPIO_PORTD_DATA_R &= ~LCD_RS;     // Select Control mode (write to instruction register)
-  for( i=0; i<1000; i )
-	  i++;
+//  for( i=0; i<1000; i )
+//	  i++;
 
   GPIO_PORTD_DATA_R |= LCD_E;		// Set E High LCD_E (Starts data read/write.)
-  for( i=0; i<1000; i )
-	  i++;
+//  for( i=0; i<1000; i )
+//	  i++;
 
   GPIO_PORTD_DATA_R &= ~LCD_E;		// Set E Low
-  for( i=0; i<1000; i )
-	  i++;
+//  for( i=0; i<1000; i )
+//	  i++;
 }
 
 void wr_ctrl_LCD_high( INT8U Ch )
