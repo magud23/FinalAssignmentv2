@@ -26,7 +26,7 @@ extern QueueHandle_t xQueue_lcd;
 INT8U get_pass_status()
 {
     INT8U ch = PASS_DECLINED;
-    if xQueueReceive(pass_accept_q, &ch, 0);
+    if (xQueueReceive(pass_accept_q, &ch, 0));
     return ch;
 }
 
