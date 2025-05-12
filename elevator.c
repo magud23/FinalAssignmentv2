@@ -80,6 +80,7 @@ extern void elevator_task(void *pvParameters)
     INT8U current_floor = floor_name2loc(2);
     INT8U destination_floor = floor_name2loc(0);
     INT8U travelling_dist;
+    INT8U ch;
     INT8U use_counter = 0;
     while(1)
     {
@@ -165,12 +166,6 @@ extern void elevator_task(void *pvParameters)
             }
             break;
         }
-
-
-
-
-
-
     }
 }
 

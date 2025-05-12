@@ -37,6 +37,8 @@
 #include "adcRTOS.h"
 #include "leds.h"
 #include "lcd.h"
+#include "encoder.h"
+#include "UI_task.h"
 #include "elevator.h"
 #include "keyRTOS.h"
 #include "password.h"
@@ -65,6 +67,11 @@
 //Queues
 extern QueueHandle_t uart_rx_q;
 extern QueueHandle_t uart_tx_q;
+
+extern QueueHandle_t adc_q;
+extern QueueHandle_t encoder_pos_q;
+extern QueueHandle_t encoder_push_q;
+
 extern QueueHandle_t key_q;
 extern QueueHandle_t xQueue_lcd;
 extern SemaphoreHandle_t xSemaphore_lcd;
@@ -115,6 +122,12 @@ static INT16U setupInterTaskCommunication(void)
     button_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
     tmp = tmp && ( button_q != NULL);
 
+    encoder_pos_q = xQueueCreate(BUFFER_LEN, sizeof(INT16S));
+    tmp = tmp && ( encoder_pos_q != NULL);
+
+    encoder_push_q = xQueueCreate(BUFFER_LEN, sizeof(BOOLEAN));
+    tmp = tmp && ( encoder_push_q != NULL);
+	
     key_q = xQueueCreate(QUEUE_LEN, sizeof(INT16U));
     tmp = tmp && ( key_q != NULL);
 
@@ -133,7 +146,6 @@ int main(void)
 {
     setupHardware();
 
-
     if(setupInterTaskCommunication()){
            xTaskCreate( status_led_task, "Status_led", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( uart_rx_task, "Uart rx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
@@ -143,14 +155,12 @@ int main(void)
            xTaskCreate( button_task, "Button ", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
            xTaskCreate( password_task, "password", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
            xTaskCreate( leds_task, "LEDS", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
+           xTaskCreate( encoder_task, "Encoder driver", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( lcd_task, "LCD driver", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
+           xTaskCreate( UI_task, "UI task", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( elevator_task, "Elevator", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
 
            vTaskStartScheduler();
     }
-
-
-
-
     return 0;
 }
