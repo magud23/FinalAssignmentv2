@@ -40,6 +40,7 @@
 #include "elevator.h"
 #include "keyRTOS.h"
 #include "password.h"
+#include "button.h"
 
 
 /*****************************    Defines    *******************************/
@@ -61,13 +62,17 @@
 
 /*****************************   Constants   *******************************/
 /*****************************   Variables   *******************************/
+//Queues
 extern QueueHandle_t uart_rx_q;
 extern QueueHandle_t uart_tx_q;
-extern QueueHandle_t adc_q;
 extern QueueHandle_t key_q;
 extern QueueHandle_t xQueue_lcd;
-
 extern SemaphoreHandle_t xSemaphore_lcd;
+
+//Buffers
+extern QueueHandle_t adc_q;
+extern QueueHandle_t pass_accept_q;
+extern QueueHandle_t button_q;
 
 
 /*****************************   Functions   *******************************/
@@ -104,6 +109,12 @@ static INT16U setupInterTaskCommunication(void)
     adc_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
     tmp = tmp && ( adc_q != NULL);
 
+    pass_accept_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
+    tmp = tmp && ( pass_accept_q != NULL);
+
+    button_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
+    tmp = tmp && ( button_q != NULL);
+
     key_q = xQueueCreate(QUEUE_LEN, sizeof(INT16U));
     tmp = tmp && ( key_q != NULL);
 
@@ -128,7 +139,8 @@ int main(void)
            xTaskCreate( uart_rx_task, "Uart rx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( uart_tx_task, "Uart tx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( adc_task, "ADC (potmeter)", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
-           xTaskCreate( key_task, "Keypad",USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
+           xTaskCreate( key_task, "Keypad", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
+           xTaskCreate( button_task, "Button ", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
            xTaskCreate( password_task, "password", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
            xTaskCreate( leds_task, "LEDS", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( lcd_task, "LCD driver", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );

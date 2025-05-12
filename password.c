@@ -9,6 +9,7 @@
 #include "glob_def.h"
 #include "keyRTOS.h"
 #include "lcd.h"
+#include "button.h"
 /*************************** Defines *****************************/
 #define LENGTH 4
 #define DIVISOR 8
@@ -26,7 +27,7 @@ extern QueueHandle_t xQueue_lcd;
 INT8U get_pass_status()
 {
     INT8U ch = PASS_DECLINED;
-    if xQueueReceive(pass_accept_q, &ch, 0);
+    xQueueReceive(pass_accept_q, &ch, 0);
     return ch;
 }
 

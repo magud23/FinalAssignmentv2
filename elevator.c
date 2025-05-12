@@ -8,6 +8,7 @@
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "semphr.h"
+#include "button.h"
 
 /*************************** Defines *****************************/
 //STATES
@@ -85,18 +86,23 @@ extern void elevator_task(void *pvParameters)
         vTaskDelay( 100 / portTICK_RATE_MS); // wait 100 ms
 
         /*------STATE MACHINE ------*/
-
-
-
-
-
         switch(state)
         {
         case FLOOR2_S:
-            if(1)  //TODO: if longpress
+            if(get_button_evet() == BE_LONG_PUSH)
             {
                 travelling_dist = destination_floor - current_floor;
                 //TODO: set LEDs to accelerate mode
+                ch = 0xFF; //clear
+                xQueueSendToBack(xQueue_lcd, &ch, 0);
+                ch = 'O';
+                xQueueSendToBack(xQueue_lcd, &ch, 0);
+                ch = 'M';
+                xQueueSendToBack(xQueue_lcd, &ch, 0);
+                ch = 'W';
+                xQueueSendToBack(xQueue_lcd, &ch, 0);
+                ch = '!';
+                xQueueSendToBack(xQueue_lcd, &ch, 0);
                 state = ACCELERATE_S;
             }
             break;
