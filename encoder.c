@@ -29,7 +29,8 @@
 #define PA5 0x20
 #define PA6 0x40
 #define PA7 0x80
-#define RESET 0
+#define DELAY   1 // 1 ms
+#define RESET   0
 #define CHANGE_ON_A 0x02
 #define CHANGE_ON_B 0x01
 
@@ -76,7 +77,6 @@ void encoder_task(void *pvParameters)
     INT16S encoder_value = RESET;
     BOOLEAN encoder_push;
     INT8U current_AB = RESET, prev_AB = RESET, YY = RESET;
-    portTickType delay = 1; // 1 ms
 
     encoder_init();
 
