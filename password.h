@@ -1,20 +1,18 @@
-#ifndef ELEVATOR_H_
-#define ELEVATOR_H_
+#ifndef PASSWORD_H_
+#define PASSWORD_H_
 /*************************** Header ******************************/
 /*************************** Include files ***********************/
 /*************************** Defines *****************************/
 /*************************** Variables ***************************/
 /*************************** Function ****************************/
 
-extern void elevator_task(void *pvParameters);
+extern void password_task(void *pvParameters);
 /*****************************************************************
 * Input:
 * Output:
 * Function:
 ******************************************************************/
 
-INT8U floor_name2loc(INT8U name);
-INT8U floor_loc2name(INT8U name);
 
 /*************************** End of module ***********************/
-#endif /* ELEVATOR_H_ */
+#endif /* PASSWORD_H_ */
