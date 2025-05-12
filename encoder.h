@@ -24,9 +24,7 @@
 #include <stdint.h>
 #include "tm4c123gh6pm.h"
 #include "FreeRTOS.h"
-#include "Task.h"
 #include "queue.h"
-#include "semphr.h"
 #include "emp_type.h"
 #include "gpio.h"
 
@@ -43,13 +41,6 @@ void encoder_init(void);
  *   Function : Initial function
  ******************************************************************************/
 
-BOOLEAN digi_p2(void);
-/*****************************************************************************
- *   Input    : -
- *   Output   : -
- *   Function : Get pin value function
- ******************************************************************************/
-
 BOOLEAN encoder_a(void);
 /*****************************************************************************
  *   Input    : -
@@ -62,6 +53,13 @@ BOOLEAN encoder_b(void);
  *   Input    : -
  *   Output   : -
  *   Function : Get channel B value function
+ ******************************************************************************/
+
+BOOLEAN digi_p2(void);
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : Get pin value function
  ******************************************************************************/
 
 void encoder_task(void *pvParameters);
