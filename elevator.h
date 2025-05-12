@@ -13,6 +13,8 @@ extern void elevator_task(void *pvParameters);
 * Function:
 ******************************************************************/
 
+INT8U floor_name2loc(INT8U name);
+INT8U floor_loc2name(INT8U name);
 
 /*************************** End of module ***********************/
 #endif /* ELEVATOR_H_ */
