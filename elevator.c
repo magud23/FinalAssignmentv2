@@ -26,8 +26,8 @@ extern void elevator_task(void *pvParameters)
     while(1)
     {
         vTaskDelay( 1000 / portTICK_RATE_MS); // wait 1000 ms
-        ch = 't';
-        xQueueSendToBack(xQueue_lcd, &ch, 0);
+//        ch = 't';
+//        xQueueSendToBack(xQueue_lcd, &ch, 0);
     }
 }
 
