@@ -38,6 +38,8 @@
 #include "leds.h"
 #include "lcd.h"
 #include "elevator.h"
+#include "keyRTOS.h"
+#include "password.h"
 
 
 /*****************************    Defines    *******************************/
@@ -62,6 +64,7 @@
 extern QueueHandle_t uart_rx_q;
 extern QueueHandle_t uart_tx_q;
 extern QueueHandle_t adc_q;
+extern QueueHandle_t key_q;
 extern QueueHandle_t xQueue_lcd;
 
 extern SemaphoreHandle_t xSemaphore_lcd;
@@ -101,6 +104,9 @@ static INT16U setupInterTaskCommunication(void)
     adc_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
     tmp = tmp && ( adc_q != NULL);
 
+    key_q = xQueueCreate(QUEUE_LEN, sizeof(INT16U));
+    tmp = tmp && ( key_q != NULL);
+
     xQueue_lcd = xQueueCreate( QUEUE_LEN , sizeof( INT8U ));
     tmp = tmp && ( xQueue_lcd != NULL);
 
@@ -116,28 +122,18 @@ int main(void)
 {
     setupHardware();
 
-    INT16U tmp = TRUE;
-    uart_rx_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
-    uart_tx_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
-    tmp = (uart_rx_q != NULL) && (uart_tx_q != NULL);
 
-    adc_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
-    tmp = tmp && ( adc_q != NULL);
-
-    xQueue_lcd = xQueueCreate( QUEUE_LEN , sizeof( INT8U ));
-    tmp = tmp && ( xQueue_lcd != NULL);
-
-    xSemaphore_lcd = xSemaphoreCreateMutex();
-    tmp = tmp && ( xSemaphore_lcd != NULL);
-
-    if(tmp){
+    if(setupInterTaskCommunication()){
            xTaskCreate( status_led_task, "Status_led", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( uart_rx_task, "Uart rx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( uart_tx_task, "Uart tx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( adc_task, "ADC (potmeter)", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
+           xTaskCreate( key_task, "Keypad",USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
+           xTaskCreate( password_task, "password", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
            xTaskCreate( leds_task, "LEDS", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( lcd_task, "LCD driver", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
            xTaskCreate( elevator_task, "Elevator", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
+
            vTaskStartScheduler();
     }
 

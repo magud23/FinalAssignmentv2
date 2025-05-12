@@ -82,7 +82,7 @@ extern void elevator_task(void *pvParameters)
     INT8U use_counter = 0;
     while(1)
     {
-        vTaskDelay( 100 / portTICK_RATE_MS); // wait 1000 ms
+        vTaskDelay( 100 / portTICK_RATE_MS); // wait 100 ms
 
         /*------STATE MACHINE ------*/
 
