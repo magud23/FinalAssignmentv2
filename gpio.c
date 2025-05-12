@@ -47,20 +47,20 @@ void init_gpio(void)
   dummy = SYSCTL_RCGC2_R;
 
   // Set the direction as output
-  GPIO_PORTA_DIR_R = 0x1C;
-  GPIO_PORTC_DIR_R = 0xF0;
-  GPIO_PORTD_DIR_R = 0x4C;
-  GPIO_PORTF_DIR_R = 0x0E;
+  GPIO_PORTA_DIR_R |= 0x1C;
+  GPIO_PORTC_DIR_R |= 0xF0;
+  GPIO_PORTD_DIR_R |= 0x4C;
+  GPIO_PORTF_DIR_R |= 0x0E;
 
   // Enable the GPIO pins for digital function
-  GPIO_PORTA_DEN_R = 0x1C;
-  GPIO_PORTC_DEN_R = 0xF0;
-  GPIO_PORTD_DEN_R = 0x4C;
-  GPIO_PORTE_DEN_R = 0x0F;
-  GPIO_PORTF_DEN_R = 0x1F;
+  GPIO_PORTA_DEN_R |= 0x1C;
+  GPIO_PORTC_DEN_R |= 0xF0;
+  GPIO_PORTD_DEN_R |= 0x4C;
+  GPIO_PORTE_DEN_R |= 0x0F;
+  GPIO_PORTF_DEN_R |= 0x1F;
 
   // Enable internal pull-up (PF0 and PF4).
-  GPIO_PORTF_PUR_R = 0x11;
+  GPIO_PORTF_PUR_R |= 0x11;
 }
 
 /****************************** End Of Module *******************************/

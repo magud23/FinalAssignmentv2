@@ -86,10 +86,6 @@ extern void elevator_task(void *pvParameters)
 
         /*------STATE MACHINE ------*/
 
-
-
-
-
         switch(state)
         {
         case FLOOR2_S:
@@ -159,12 +155,6 @@ extern void elevator_task(void *pvParameters)
             }
             break;
         }
-
-
-
-
-
-
     }
 }
 
