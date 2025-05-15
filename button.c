@@ -70,7 +70,7 @@ void button_task(void *pvParameters)
 
   while(1)
   {
-      vTaskDelay( PERIOD / portTICK_RATE_MS);
+      vTaskDelay( PERIOD_MS / portTICK_RATE_MS);
 
       switch( button_state )
       {

@@ -38,6 +38,7 @@ void button_task(void *pvParameters);
 *   Function : Test function
 ******************************************************************************/
 
+INT8U get_button_event(void);
 
 /****************************** End Of Module *******************************/
 #endif /*BUTTON_H_*/

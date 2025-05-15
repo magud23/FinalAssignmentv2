@@ -109,14 +109,14 @@ extern void key_task(void *pvParameters)
         switch(my_state)
           {
           case IDLE_S :
-            GPIO_PORTA_DATA_R &= ~(COL1|COL2|COL3);          // Clear the 3 bits for the columns 0XE3
-            GPIO_PORTA_DATA_R |= COL1;          // Set the bit for column 1
-            if (check_column(1))                // Check all the rows for column 1, using the function check_column
-            {                                   // If a button press is registered we go to next state so the press is only registered once
+            GPIO_PORTA_DATA_R &= ~(COL1|COL2|COL3);     // Clear the 3 bits for the columns 0XE3
+            GPIO_PORTA_DATA_R |= COL1;                  // Set the bit for column 1
+            if (check_column(1))                        // Check all the rows for column 1, using the function check_column
+            {                                           // If a button press is registered we go to next state so the press is only registered once
                 my_state = HOLDING_S;
                 break;
             }
-            GPIO_PORTA_DATA_R &= ~(COL1|COL2|COL3);          // Repeat the above for the two other columns
+            GPIO_PORTA_DATA_R &= ~(COL1|COL2|COL3);     // Repeat the above for the two other columns
             GPIO_PORTA_DATA_R |= COL2;
             if (check_column(2))
             {

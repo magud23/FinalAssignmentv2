@@ -90,7 +90,7 @@ extern void elevator_task(void *pvParameters)
         switch(state)
         {
         case FLOOR2_S:
-            if(get_button_evet() == BE_LONG_PUSH)
+            if(get_button_event() == BE_LONG_PUSH)
             {
                 travelling_dist = destination_floor - current_floor;
                 //TODO: set LEDs to accelerate mode
