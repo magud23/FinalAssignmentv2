@@ -61,14 +61,10 @@ init_adc()
 void adc_task(void *pvParameters)
 {
     init_adc();
-
     INT16U adc_val;
-
-
 
     while(1)
     {
-
         adc_val = get_adc();
         xQueueOverwrite(adc_q, &adc_val);
         vTaskDelay(200 / portTICK_RATE_MS); // wait 200 ms.

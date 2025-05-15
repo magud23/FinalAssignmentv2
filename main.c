@@ -80,7 +80,7 @@ extern SemaphoreHandle_t xSemaphore_lcd;
 extern QueueHandle_t adc_q;
 extern QueueHandle_t pass_accept_q;
 extern QueueHandle_t button_q;
-
+extern QueueHandle_t led_q;
 
 /*****************************   Functions   *******************************/
 
@@ -115,6 +115,9 @@ static INT16U setupInterTaskCommunication(void)
 
     adc_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
     tmp = tmp && ( adc_q != NULL);
+
+    led_q = xQueueCreate(BUFFER_LEN, sizeof(INT8U));
+    tmp = tmp && ( led_q != NULL);
 
     pass_accept_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
     tmp = tmp && ( pass_accept_q != NULL);
