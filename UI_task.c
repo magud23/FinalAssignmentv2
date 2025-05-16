@@ -155,6 +155,38 @@ void password_mode()
 
 }
 
+pot_goal_mode()
+{
+    INT8U current_floor = 0 ;
+    get_current_floor(&current_floor);
+    INT16U target_val = current_floor_to_randomlike_reference(current_floor);
+
+    LCD_print_char(0xff);
+    LCD_print_char((target_val/1000) % 10 + '0');
+    LCD_print_char((target_val/100) % 10 + '0');
+    LCD_print_char((target_val/10) % 10 + '0');
+    LCD_print_char(target_val % 10 + '0');
+
+
+    INT16U adc_val = get_adc();
+    move_LCD(0,1);
+    LCD_print_char((adc_val/1000) % 10 + '0');
+    LCD_print_char((adc_val/100) % 10 + '0');
+    LCD_print_char((adc_val/10) % 10 + '0');
+    LCD_print_char(adc_val % 10 + '0');
+}
+
+enc_error_mode()
+{
+    LCD_print_char(0xff);
+    LCD_print_char('W');
+    LCD_print_char('R');
+    LCD_print_char('O');
+    LCD_print_char('N');
+    LCD_print_char('G');
+    LCD_print_char('!');
+}
+
 
 void UI_task(void *pvParameters)
 {
@@ -171,13 +203,16 @@ void UI_task(void *pvParameters)
         switch(ui_mode)
         {
         case UI_IDLE:
+            LCD_print_char(0xff);
             break;
         case UI_CURRENT_FLOOR:
             current_floor_mode();
             break;
         case UI_POT_GOAL:
+            pot_goal_mode();
             break;
         case UI_ENC_ERROR :
+            enc_error_mode();
             break;
         case UI_FLOOR_SELECT:
             floor_select_mode();

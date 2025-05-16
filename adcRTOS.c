@@ -20,9 +20,16 @@ QueueHandle_t adc_q;
 /*****************************   Functions   *******************************/
 
 
-INT16U get_adc()
+INT16U read_adc()
 {
   return( ADC0_SSFIFO3_R );
+}
+
+INT16U get_adc()
+{
+    INT16U adc_val = 0;
+    xQueuePeek(adc_q, &adc_val,0);
+    return adc_val;
 }
 
 init_adc()
@@ -65,7 +72,7 @@ void adc_task(void *pvParameters)
 
     while(1)
     {
-        adc_val = get_adc();
+        adc_val = read_adc();
         xQueueOverwrite(adc_q, &adc_val);
         vTaskDelay(20 / portTICK_RATE_MS); // wait 20 ms.
     }

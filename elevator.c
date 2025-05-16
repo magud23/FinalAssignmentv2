@@ -12,6 +12,7 @@
 #include "leds.h"
 #include "password.h"
 #include "UI_task.h"
+#include "adcRTOS.h"
 
 /*************************** Defines *****************************/
 //Task execution period (delay)
@@ -84,7 +85,6 @@ void set_destination_floor(INT8U destination_floor)
 }
 
 
-
 INT8U floor_name2loc(INT8U name)
 /*****************************************************************
  * Input: name of floor
@@ -120,6 +120,11 @@ INT8U floor_loc2name(INT8U location) //TODO: move to UI task
 }
 
 
+INT16U current_floor_to_randomlike_reference(INT8U current_floor)
+{
+    return ((((INT16U)current_floor+7)%TOP_FLOOR)* (MAX_POT_VAL*3)/(2*TOP_FLOOR+5) + 44) % MAX_POT_VAL; //these numbers are actually magic and have no inherent meaning
+}
+
 
 extern void elevator_task(void *pvParameters)
 /*****************************************************************
@@ -131,12 +136,14 @@ extern void elevator_task(void *pvParameters)
     INT8U state = FLOOR2_S;
     INT8U current_floor = floor_name2loc(2);
     INT8U destination_floor = floor_name2loc(0);
-    INT8U use_counter = 3;
-    //TODO: INT8U use_counter = RESET;
+    INT8S travel_dist = 0;
+    INT8U use_counter = RESET;
     INT16U elevator_timer = RESET;
     BOOLEAN encoder_push = RESET;
     INT16S encoder_val, prev_encoder_val, dest_encoder_val;
     BOOLEAN first_journey = TRUE;
+    BOOLEAN encoder_dir_is_clockwise = TRUE;
+
 
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
@@ -152,25 +159,22 @@ extern void elevator_task(void *pvParameters)
         case FLOOR2_S:
             if(get_button_event() == BE_LONG_PUSH)
             {
+                travel_dist = (INT8S)destination_floor - (INT8S)current_floor;
+                use_counter = (use_counter + 1) % 4;
                 set_led_mode(LED_ACCELERATE);
                 set_ui_mode(UI_CURRENT_FLOOR);
-
                 state = ACCELERATE_S;
             }
             break;
 
         case WAIT_FOR_PASS_S:
-
             if(get_pass_status() == PASS_ACCEPTED)
             {
                 set_ui_mode(UI_FLOOR_SELECT);
                 state = SELECT_FLOOR_S;
-
                 xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
                 prev_encoder_val = encoder_val;
             }
-
-
 
             break;
 
@@ -181,6 +185,7 @@ extern void elevator_task(void *pvParameters)
 
             if(encoder_push) // select the floor
             {
+                travel_dist = (INT8S)destination_floor - (INT8S)current_floor;
                 set_led_mode(LED_ACCELERATE);
                 set_ui_mode(UI_CURRENT_FLOOR);
                 state = ACCELERATE_S;
@@ -210,11 +215,11 @@ extern void elevator_task(void *pvParameters)
             if(elevator_timer++ ==  ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS)
             {
                 elevator_timer = RESET;
-                if(current_floor < destination_floor/2)
+                if(current_floor < destination_floor - travel_dist/2)
                 {
                     current_floor++;
                 }
-                else if(current_floor > destination_floor/2)
+                else if(current_floor > destination_floor - travel_dist/2)
                 {
                     current_floor--;
                 }
@@ -266,14 +271,16 @@ extern void elevator_task(void *pvParameters)
         case DOORS_CLOSED_S:
             if(get_button_event() == BE_LONG_PUSH) //wait for sw1 long press
             {
-                use_counter = (use_counter + 1) % 4;
                 if(use_counter == 0) //breaks on 4th use
                 {
+                    use_counter = (use_counter + 1) % 4;
                     set_led_mode(LED_BROKEN);
+                    set_ui_mode(UI_POT_GOAL);
                     state = BROKEN1_S;
                 }
                 else
                 {
+                    use_counter = (use_counter + 1) % 4;
                     set_led_mode(LED_OPEN);
                     set_ui_mode(UI_PASSWORD);
                     state = WAIT_FOR_PASS_S;
@@ -282,14 +289,22 @@ extern void elevator_task(void *pvParameters)
             break;
 
         case BROKEN1_S:
-            if(1) //TODO: POT is MATCH
+            if(get_adc() == current_floor_to_randomlike_reference(floor_loc2name(current_floor))) //POT is MATCH
             {
                 set_led_mode(LED_OPEN); //stop blinking
-                //TODO: switch encoder direction
-
+                encoder_dir_is_clockwise = !encoder_dir_is_clockwise;
+                set_ui_mode(UI_CURRENT_FLOOR);
                 // update destination encoder value
                 xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
-                dest_encoder_val = encoder_val + FULL_REVOLUTION; //TODO: Change direction every other time here
+
+                if(encoder_dir_is_clockwise)
+                {
+                    dest_encoder_val = encoder_val + FULL_REVOLUTION;
+                }
+                else
+                {
+                    dest_encoder_val = encoder_val - FULL_REVOLUTION;
+                }
 
                 state = BROKEN2_S;
             }
@@ -300,21 +315,23 @@ extern void elevator_task(void *pvParameters)
             xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
             xQueueReceive(encoder_push_q, &encoder_push, portMAX_DELAY);
 
-            if(encoder_push && (encoder_val >= dest_encoder_val)) // encoder has reached destination and is pushed
+            if(encoder_push && ( ((encoder_val >= dest_encoder_val) && encoder_dir_is_clockwise) || ((encoder_val <= dest_encoder_val) && !encoder_dir_is_clockwise) )) // encoder has reached destination and is pushed
             {
                 state = WAIT_FOR_PASS_S;
+                set_ui_mode(UI_PASSWORD);
             }
             else // update selection
             {
                 // check direction of change
-                if(encoder_val > prev_encoder_val) // up
+                if(((encoder_val < prev_encoder_val) && encoder_dir_is_clockwise) || ((encoder_val > prev_encoder_val) && !encoder_dir_is_clockwise)) // up
                 {
-                    //TODO: tell LCD the direction is right or wrong
+                    set_ui_mode(UI_ENC_ERROR);
                 }
-                else if(encoder_val < prev_encoder_val) // down
+                else if(encoder_val != prev_encoder_val)
                 {
+                    set_ui_mode(UI_IDLE);
+                }
 
-                }
             }
 
             // update previous value
