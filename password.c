@@ -14,11 +14,12 @@
 /*************************** Defines *****************************/
 #define LENGTH 4
 #define DIVISOR 8
-
+#define RESET 0
 
 /*************************** Constants ***************************/
 /*************************** Variables ***************************/
 QueueHandle_t pass_accept_q;
+QueueHandle_t password_q;
 
 extern QueueHandle_t key_q;
 extern QueueHandle_t xQueue_lcd;
@@ -34,44 +35,45 @@ INT8U get_pass_status()
 
 extern void password_task(void *pvParameters)
 /*****************************************************************************
-*   Input    :
-*   Output   :
-*   Function :
-******************************************************************************/
+ *   Input    :
+ *   Output   :
+ *   Function :
+ ******************************************************************************/
 {
-    INT8U password = 0;
-    INT8U length = 0;
+    INT16U password = RESET;
+    INT8U length = RESET;
     INT8U keypress;
-    INT8U ch;
     INT8U status;
     while(1)
     {
-        xQueueReceive(key_q, &keypress, portMAX_DELAY);
-
-        if(keypress == '*')
+        if (xQueueReceive(key_q, &keypress, portMAX_DELAY) == pdTRUE)
         {
-
-            password = 0;
-            length = 0;
-        }
-        else if(keypress == '#')
-        {
-            if(password % DIVISOR == 0 && password != 0 && length == LENGTH)
+            if(keypress == '*')
             {
-                // send confirmation to elevator
-                status = PASS_ACCEPTED;
-                xQueueOverwrite(pass_accept_q, &status);
+                password = RESET;
+                length = RESET;
+                xQueueOverwrite(password_q, &password);
             }
-            password = 0;
-            length = 0;
+            else if(keypress == '#')
+            {
+                if(password % DIVISOR == 0 && password != 0 && length == LENGTH)
+                {
+                    // send confirmation to elevator
+                    status = PASS_ACCEPTED;
+                    xQueueOverwrite(pass_accept_q, &status);
+                }
+                password = RESET;
+                length = RESET;
+                xQueueOverwrite(password_q, &password);
+            }
+            else
+            {
+                password = password*(INT16U)10; // move decimal left
+                password += (INT16U)keypress - '0';
+                length++;
+                xQueueOverwrite(password_q, &password);
+            }
         }
-        else
-        {
-            password = password << 1;
-            password += keypress - '0';
-            length++;
-        }
-
     }
 }
 

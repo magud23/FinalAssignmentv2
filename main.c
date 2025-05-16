@@ -75,6 +75,7 @@ extern SemaphoreHandle_t xSemaphore_lcd;
 
 //Buffers
 extern QueueHandle_t adc_q;
+extern QueueHandle_t password_q;
 extern QueueHandle_t pass_accept_q;
 extern QueueHandle_t button_q;
 extern QueueHandle_t led_q;
@@ -131,10 +132,16 @@ static INT16U setupInterTaskCommunication(void)
     current_floor_q = xQueueCreate(SHARED_MEM_LEN, sizeof(INT8U));
     tmp = tmp && ( current_floor_q != NULL);
 
-    pass_accept_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
+    destination_floor_q = xQueueCreate(BUFFER_LEN, sizeof(INT8U));
+    tmp = tmp && ( destination_floor_q != NULL);
+
+    password_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
+    tmp = tmp && ( password_q != NULL);
+
+    pass_accept_q = xQueueCreate(BUFFER_LEN, sizeof(INT8U));
     tmp = tmp && ( pass_accept_q != NULL);
 
-    button_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
+    button_q = xQueueCreate(BUFFER_LEN, sizeof(INT8U));
     tmp = tmp && ( button_q != NULL);
 
     encoder_pos_q = xQueueCreate(BUFFER_LEN, sizeof(INT16S));
@@ -143,10 +150,7 @@ static INT16U setupInterTaskCommunication(void)
     encoder_push_q = xQueueCreate(BUFFER_LEN, sizeof(BOOLEAN));
     tmp = tmp && ( encoder_push_q != NULL);
 	
-    destination_floor_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
-    tmp = tmp && ( destination_floor_q != NULL);
-
-    key_q = xQueueCreate(QUEUE_LEN, sizeof(INT16U));
+    key_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
     tmp = tmp && ( key_q != NULL);
 
     xQueue_lcd = xQueueCreate( QUEUE_LEN , sizeof( INT8U ));

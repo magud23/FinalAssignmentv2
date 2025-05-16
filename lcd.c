@@ -235,7 +235,6 @@ void out_LCD( INT8U Ch )
   out_LCD_low( Ch );
 }
 
-
 void lcd_task( void *pvParameters )
 {
   INT8U ch;
@@ -248,7 +247,7 @@ void lcd_task( void *pvParameters )
         case LCD_POWER_UP:
           LCD_init = 0;
           my_state = LCD_INIT;
-          vTaskDelay(40 / portTICK_RATE_MS); // wait 100 ms.
+          vTaskDelay(100 / portTICK_RATE_MS); // wait 100 ms.
           break;
 
         case LCD_INIT:
@@ -260,8 +259,9 @@ void lcd_task( void *pvParameters )
           {
             my_state = LCD_READY;
           }
-          vTaskDelay(5 / portTICK_RATE_MS); // wait 100 ms.
+          vTaskDelay(50 / portTICK_RATE_MS); // wait 100 ms.
           break;
+
         case LCD_READY:
           if(uxQueueMessagesWaiting(xQueue_lcd))
           {
@@ -284,7 +284,7 @@ void lcd_task( void *pvParameters )
                   xSemaphoreGive( xSemaphore_lcd );
               }
           }
-          vTaskDelay( 1 / portTICK_RATE_MS); // wait 10 ms
+          vTaskDelay( 2 / portTICK_RATE_MS); // wait 1 ms
           break;
 
         case LCD_ESC_RECEIVED:
@@ -309,12 +309,12 @@ void lcd_task( void *pvParameters )
                       }
                       //set_state( LCD_READY );
                       my_state = LCD_READY;
-                      vTaskDelay(1 / portTICK_RATE_MS); // wait 100 ms.
+                      vTaskDelay(2 / portTICK_RATE_MS); // wait 100 ms.
                   }
               xSemaphoreGive( xSemaphore_lcd );
               }
           }
-          vTaskDelay( 1 / portTICK_RATE_MS); // wait 100 ms
+          vTaskDelay( 2 / portTICK_RATE_MS); // wait 1 ms
           break;
       }
   }

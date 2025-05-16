@@ -1,21 +1,21 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded C Programming (ECP)
-*
-* MODULENAME.: leds.c
-*
-* PROJECT....: ECP
-*
-* DESCRIPTION: See module specification file (.h-file).
-*
-* Change Log:
-******************************************************************************
-* Date    Id    Change
-* YYMMDD
-* --------------------
-* 050128  KA    Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ * Embedded C Programming (ECP)
+ *
+ * MODULENAME.: leds.c
+ *
+ * PROJECT....: ECP
+ *
+ * DESCRIPTION: See module specification file (.h-file).
+ *
+ * Change Log:
+ ******************************************************************************
+ * Date    Id    Change
+ * YYMMDD
+ * --------------------
+ * 050128  KA    Module created.
+ *
+ *****************************************************************************/
 
 /***************************** Include files *******************************/
 #include <stdint.h>
@@ -23,6 +23,7 @@
 #include "emp_type.h"
 
 #include "FreeRTOS.h"
+#include "adcRTOS.h"
 #include "Task.h"
 #include "queue.h"
 #include "semphr.h"
@@ -49,16 +50,16 @@ INT16U max_out 1000; */
 
 /*****************************   Variables   *******************************/
 QueueHandle_t ui_mode_q;
-extern QueueHandle_t encoder_pos_q, xQueue_lcd, destination_floor_q;
+extern QueueHandle_t encoder_pos_q, xQueue_lcd, destination_floor_q, password_q;
 /*****************************   Functions   *******************************/
 
 
 void set_ui_mode(INT8U led_mode)
 /*****************************************************************************
-*   Input    :  INT8U representing led mode
-*   Output   :  -
-*   Function :  Put a ui_mode into buffer for ui_task
-*****************************************************************************/
+ *   Input    :  INT8U representing led mode
+ *   Output   :  -
+ *   Function :  Put a ui_mode into buffer for ui_task
+ *****************************************************************************/
 {
     xQueueOverwrite(ui_mode_q, &led_mode);
 }
@@ -74,7 +75,6 @@ char change_int_to_char1(INT8U number)
 {
     return '0' + number;
 }
-
 
 
 void encoder_mode()
@@ -103,19 +103,23 @@ void encoder_mode()
 
 void current_floor_mode()
 {
-    static INT8U previous_floor = 0;
-    INT8U current_floor = previous_floor;
 
-    get_current_floor(&current_floor);
+    LCD_print_char(0xff); //clear and home display
 
-    if(previous_floor != current_floor)
-    {
-        previous_floor = current_floor;
-
-        LCD_print_char(0xff); //clear and home display
-        LCD_print_char(change_int_to_char1(current_floor/10 % 10));
-        LCD_print_char(change_int_to_char1(current_floor % 10));
-    }
+    LCD_print_char('C');
+    LCD_print_char('U');
+    LCD_print_char('R');
+    LCD_print_char('R');
+    LCD_print_char('E');
+    LCD_print_char('N');
+    LCD_print_char('T');
+    LCD_print_char(' ');
+    LCD_print_char('F');
+    LCD_print_char('L');
+    LCD_print_char('O');
+    LCD_print_char('O');
+    LCD_print_char('R');
+    LCD_print_char(':');
 }
 
 
@@ -127,6 +131,9 @@ void floor_select_mode()
     LCD_print_char('S');
     LCD_print_char('E');
     LCD_print_char('L');
+    LCD_print_char('E');
+    LCD_print_char('C');
+    LCD_print_char('T');
     LCD_print_char(' ');
     LCD_print_char('F');
     LCD_print_char('L');
@@ -134,14 +141,6 @@ void floor_select_mode()
     LCD_print_char('O');
     LCD_print_char('R');
     LCD_print_char(':');
-
-    INT8U dest_floor = 0;
-    get_current_floor(&dest_floor);
-    xQueuePeek(destination_floor_q, &dest_floor,0);
-    LCD_print_char(change_int_to_char1(dest_floor/10 % 10));
-    LCD_print_char(change_int_to_char1(dest_floor % 10));
-
-
 }
 
 void password_mode()
@@ -156,8 +155,7 @@ void password_mode()
     LCD_print_char('P');
     LCD_print_char('I');
     LCD_print_char('N');
-
-    move_LCD(0,1);
+    LCD_print_char(' ');
     LCD_print_char('T');
     LCD_print_char('H');
     LCD_print_char('E');
@@ -174,18 +172,10 @@ pot_goal_mode()
     INT16U target_val = current_floor_to_randomlike_reference(current_floor);
 
     LCD_print_char(0xff);
-    LCD_print_char((target_val/1000) % 10 + '0');
-    LCD_print_char((target_val/100) % 10 + '0');
-    LCD_print_char((target_val/10) % 10 + '0');
-    LCD_print_char(target_val % 10 + '0');
-
-
-    INT16U adc_val = get_adc();
-    move_LCD(0,1);
-    LCD_print_char((adc_val/1000) % 10 + '0');
-    LCD_print_char((adc_val/100) % 10 + '0');
-    LCD_print_char((adc_val/10) % 10 + '0');
-    LCD_print_char(adc_val % 10 + '0');
+    LCD_print_char(change_int_to_char1((target_val/1000) % 10));
+    LCD_print_char(change_int_to_char1((target_val/100) % 10));
+    LCD_print_char(change_int_to_char1((target_val/10) % 10));
+    LCD_print_char(change_int_to_char1(target_val % 10));
 }
 
 enc_error_mode()
@@ -204,31 +194,101 @@ void UI_task(void *pvParameters)
 {
 
     INT8U ui_mode = UI_IDLE;
+    BOOLEAN first_time = 1;
 
     while(1)
     {
-        vTaskDelay(200 / portTICK_RATE_MS); // wait 20 ms.
-        xQueueReceive(ui_mode_q, &ui_mode, 0);
+        vTaskDelay(100 / portTICK_RATE_MS); // wait 20 ms.
+
+        //set first time for static text
+        if (xQueueReceive(ui_mode_q, &ui_mode, 0) == pdTRUE)
+        {
+            first_time = 1;
+        }
 
         switch(ui_mode)
         {
         case UI_IDLE:
             LCD_print_char(0xff);
             break;
+
         case UI_CURRENT_FLOOR:
-            current_floor_mode();
+            if(first_time)
+            {
+                current_floor_mode();
+                first_time = 0;
+            }
+
+            // update number on second line
+            move_LCD(0,1);
+
+            static INT8U previous_floor = 0;
+            INT8U current_floor = previous_floor;
+
+            get_current_floor(&current_floor);
+
+            if(previous_floor != current_floor)
+            {
+                previous_floor = current_floor;
+                LCD_print_char(change_int_to_char1(current_floor/10 % 10));
+                LCD_print_char(change_int_to_char1(current_floor % 10));
+            }
+
             break;
+
         case UI_POT_GOAL:
-            pot_goal_mode();
+            if(first_time)
+            {
+                pot_goal_mode();
+                first_time = 0;
+            }
+
+            // update number on second line
+            INT16U adc_val = get_adc();
+            move_LCD(0,1);
+            LCD_print_char(change_int_to_char1((adc_val/1000) % 10));
+            LCD_print_char(change_int_to_char1((adc_val/100) % 10));
+            LCD_print_char(change_int_to_char1((adc_val/10) % 10));
+            LCD_print_char(change_int_to_char1(adc_val % 10));
+
             break;
+
         case UI_ENC_ERROR :
             enc_error_mode();
             break;
+
         case UI_FLOOR_SELECT:
-            floor_select_mode();
+            if(first_time)
+            {
+                floor_select_mode();
+                first_time = 0;
+            }
+
+            // update number on second line
+            move_LCD(0,1);
+            INT8U dest_floor = 0;
+            xQueuePeek(destination_floor_q, &dest_floor, portMAX_DELAY);
+            LCD_print_char(change_int_to_char1(dest_floor/10 % 10));
+            LCD_print_char(change_int_to_char1(dest_floor % 10));
+
             break;
+
         case UI_PASSWORD:
-            password_mode();
+            if(first_time)
+            {
+                password_mode();
+                first_time = 0;
+            }
+
+            // update number on second line
+            move_LCD(0,1);
+
+            INT8U password = 0;
+            xQueuePeek(password_q, &password, portMAX_DELAY);
+            LCD_print_char(change_int_to_char1((password /1000) % 10));
+            LCD_print_char(change_int_to_char1((password /100) % 10));
+            LCD_print_char(change_int_to_char1((password /10) % 10));
+            LCD_print_char(change_int_to_char1(password % 10));
             break;
         }
     }
