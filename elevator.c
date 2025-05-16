@@ -30,15 +30,21 @@
 #define BROKEN1_S 7
 #define BROKEN2_S 8
 
-//util
+#define RESET 0
 #define INVALID_FLOOR 99
 #define REMOVED_FLOOR 13
 #define TOP_FLOOR 20
 
 
 /*************************** Constants ***************************/
+
 /*************************** Variables ***************************/
 extern QueueHandle_t xQueue_lcd;
+extern QueueHandle_t encoder_pos_q;
+extern QueueHandle_t encoder_push_q;
+
+QueueHandle_t destination_floor_q;
+
 /*************************** Function ****************************/
 
 INT8U floor_name2loc(INT8U name)
@@ -87,13 +93,18 @@ extern void elevator_task(void *pvParameters)
     INT8U state = FLOOR2_S;
     INT8U current_floor = floor_name2loc(2);
     INT8U destination_floor = floor_name2loc(0);
-    INT8S travelling_dist = 0;
+    INT8S travelling_dist = RESET;
     INT8U ch;
-    INT8U use_counter = 0;
-    INT16U elevator_timer = 0;
+    INT8U use_counter = RESET;
+    INT16U elevator_timer = RESET;
+
+    BOOLEAN encoder_push = RESET;
+    INT16S encoder_val, prev_encoder_val;
+
     BOOLEAN first_journey = TRUE;
 
     TickType_t xLastWakeTime = xTaskGetTickCount();
+
     while(1)
     {
         vTaskDelayUntil(&xLastWakeTime, ELEVATOR_TASK_PERIOD_MS / portTICK_RATE_MS);
@@ -107,6 +118,7 @@ extern void elevator_task(void *pvParameters)
                 travelling_dist = (INT8S)destination_floor - (INT8S)current_floor;
                 set_led_mode(LED_ACCELERATE);
 
+                //TODO: fix UI integration
                 ch = 0xFF; //clear
                 xQueueSendToBack(xQueue_lcd, &ch, 0);
                 ch = 'O';
@@ -122,13 +134,45 @@ extern void elevator_task(void *pvParameters)
                 state = ACCELERATE_S;
             }
             break;
+
         case WAIT_FOR_PASS_S:
             break;
+
         case SELECT_FLOOR_S:
+            xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
+            xQueueReceive(encoder_push_q, &encoder_push, portMAX_DELAY);
+
+            if(encoder_push) // select the floor
+            {
+                // start accelerating
+                travelling_dist = (INT8S)destination_floor - (INT8S)current_floor;
+                set_led_mode(LED_ACCELERATE);
+                state = ACCELERATE_S;
+            }
+            else // update selection
+            {
+                // check direction of change
+                if(encoder_val > prev_encoder_val) // up
+                {
+                    destination_floor = destination_floor+1 % TOP_FLOOR; // increment within floor loc's
+                }
+                else if(encoder_val < prev_encoder_val) // down
+                {
+                    destination_floor = destination_floor-1 % TOP_FLOOR; // decrement within floor loc's
+                }
+
+                // send to LCD
+                xQueueOverwrite(destination_floor_q, floor_loc2name(&destination_floor));
+            }
+
+            // update previous value
+            prev_encoder_val = encoder_val;
+
             break;
+
         case ACCELERATE_S:
         {
-            INT8U debug = abs(travelling_dist) * ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS;
+            INT8U debug = abs(travelling_dist) * ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS; //TODO: update var name
             if(elevator_timer++ == debug)
             {
                 set_led_mode(LED_DECELERATE);
@@ -137,6 +181,7 @@ extern void elevator_task(void *pvParameters)
             }
         }
             break;
+
         case DECELERATE_S:
             if(elevator_timer++ == abs(travelling_dist) * ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS ) // correct time has passed based on travelling dist
             {
@@ -145,6 +190,7 @@ extern void elevator_task(void *pvParameters)
                 state = DOORS_OPEN_S;
             }
             break;
+
         case DOORS_OPEN_S:
 
             current_floor = destination_floor;
@@ -160,6 +206,7 @@ extern void elevator_task(void *pvParameters)
                 state = DOORS_CLOSED_S;
             }
             break;
+
         case DOORS_CLOSED_S:
             if(get_button_event() == BE_LONG_PUSH) //wait for sw1 long press
             {
@@ -176,6 +223,7 @@ extern void elevator_task(void *pvParameters)
                 }
             }
             break;
+
         case BROKEN1_S:
             if(1) //TODO: POT is MATCH
             {
@@ -185,6 +233,7 @@ extern void elevator_task(void *pvParameters)
             }
 
             break;
+
         case BROKEN2_S:
             if(1) //TODO: Encoder turn + press
             {

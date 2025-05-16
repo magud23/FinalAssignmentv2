@@ -83,7 +83,7 @@ void UI_task(void *pvParameters){
     char input2;
     char input3;
     while(1){
-        xQueueReceive(encoder_pos_q, &encoder_value, portMAX_DELAY);
+        xQueuePeek(encoder_pos_q, &encoder_value, portMAX_DELAY);
 
         int cv_mod0 = encoder_value % 10;
         int cv_mod10 = encoder_value/10 % 10;

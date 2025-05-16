@@ -117,7 +117,7 @@ void encoder_task(void *pvParameters)
         //send stuff
         xQueueOverwrite(encoder_pos_q, &encoder_value);
         xQueueOverwrite(encoder_push_q, &encoder_push);
-        vTaskDelay( delay / portTICK_RATE_MS); // wait 1 ms
+        vTaskDelay( DELAY / portTICK_RATE_MS); // wait 1 ms
     }
 }
 /****************************** End Of Module *******************************/
