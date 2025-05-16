@@ -49,7 +49,7 @@ INT16U max_out 1000; */
 
 /*****************************   Variables   *******************************/
 QueueHandle_t ui_mode_q;
-extern QueueHandle_t encoder_pos_q, xQueue_lcd;
+extern QueueHandle_t encoder_pos_q, xQueue_lcd, destination_floor_q;
 /*****************************   Functions   *******************************/
 
 
@@ -135,15 +135,23 @@ void floor_select_mode()
     LCD_print_char('R');
     LCD_print_char(':');
 
-    INT8U current_floor = 0;
-    get_current_floor(&current_floor);
-    LCD_print_char(change_int_to_char1(current_floor/10 % 10));
-    LCD_print_char(change_int_to_char1(current_floor % 10));
+    INT8U dest_floor = 0;
+    get_current_floor(&dest_floor);
+    xQueuePeek(destination_floor_q, &dest_floor,0);
+    LCD_print_char(change_int_to_char1(dest_floor/10 % 10));
+    LCD_print_char(change_int_to_char1(dest_floor % 10));
 
 
+}
 
+void password_mode()
+{
 
-
+    LCD_print_char(0xff); //clear and home display
+    LCD_print_char('P');
+    LCD_print_char('I');
+    LCD_print_char('N');
+    LCD_print_char(':');
 
 }
 
@@ -172,6 +180,10 @@ void UI_task(void *pvParameters)
         case UI_ENC_ERROR :
             break;
         case UI_FLOOR_SELECT:
+            floor_select_mode();
+            break;
+        case UI_PASSWORD:
+            password_mode();
             break;
         }
     }

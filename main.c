@@ -69,10 +69,6 @@
 extern QueueHandle_t uart_rx_q;
 extern QueueHandle_t uart_tx_q;
 
-extern QueueHandle_t adc_q;
-extern QueueHandle_t encoder_pos_q;
-extern QueueHandle_t encoder_push_q;
-
 extern QueueHandle_t key_q;
 extern QueueHandle_t xQueue_lcd;
 extern SemaphoreHandle_t xSemaphore_lcd;
@@ -84,8 +80,15 @@ extern QueueHandle_t button_q;
 extern QueueHandle_t led_q;
 extern QueueHandle_t ui_mode_q;
 
+extern QueueHandle_t encoder_pos_q;
+extern QueueHandle_t encoder_push_q;
+extern QueueHandle_t destination_floor_q;
+
 //Shared MEM
 extern QueueHandle_t current_floor_q;
+
+
+
 
 /*****************************   Functions   *******************************/
 
@@ -140,6 +143,9 @@ static INT16U setupInterTaskCommunication(void)
     encoder_push_q = xQueueCreate(BUFFER_LEN, sizeof(BOOLEAN));
     tmp = tmp && ( encoder_push_q != NULL);
 	
+    destination_floor_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
+    tmp = tmp && ( destination_floor_q != NULL);
+
     key_q = xQueueCreate(QUEUE_LEN, sizeof(INT16U));
     tmp = tmp && ( key_q != NULL);
 
