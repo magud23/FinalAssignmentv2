@@ -10,12 +10,12 @@
 #include "keyRTOS.h"
 #include "lcd.h"
 #include "button.h"
+#include "password.h"
 /*************************** Defines *****************************/
 #define LENGTH 4
 #define DIVISOR 8
 
-#define PASS_ACCEPTED 1
-#define PASS_DECLINED 0
+
 /*************************** Constants ***************************/
 /*************************** Variables ***************************/
 QueueHandle_t pass_accept_q;

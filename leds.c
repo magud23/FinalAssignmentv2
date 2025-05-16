@@ -46,7 +46,7 @@ QueueHandle_t led_q;
 
 void set_led_mode(INT8U led_mode)
 /*****************************************************************************
-*   Input    :  INT8U representing led_mod
+*   Input    :  INT8U representing led mode
 *   Output   :  -
 *   Function :  Put a LED_mode into buffer for led_task
 *****************************************************************************/

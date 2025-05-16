@@ -67,6 +67,6 @@ void adc_task(void *pvParameters)
     {
         adc_val = get_adc();
         xQueueOverwrite(adc_q, &adc_val);
-        vTaskDelay(200 / portTICK_RATE_MS); // wait 200 ms.
+        vTaskDelay(20 / portTICK_RATE_MS); // wait 20 ms.
     }
 }

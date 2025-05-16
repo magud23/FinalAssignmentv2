@@ -10,6 +10,8 @@
 #include "semphr.h"
 #include "button.h"
 #include "leds.h"
+#include "password.h"
+#include "UI_task.h"
 
 /*************************** Defines *****************************/
 //Task execution period (delay)
@@ -39,7 +41,29 @@
 /*************************** Constants ***************************/
 /*************************** Variables ***************************/
 extern QueueHandle_t xQueue_lcd;
+QueueHandle_t current_floor_q;
 /*************************** Function ****************************/
+
+INT8U get_current_floor(INT8U * p_current_floor)
+/*****************************************************************
+* Input: pointer to variable in which to put return from queue
+* Output: success/fail of operation
+* Function: gets current floor from shared memory
+******************************************************************/
+{
+    return xQueuePeek(current_floor_q, p_current_floor,0);
+}
+
+INT8U set_current_floor(INT8U * p_current_floor)
+/*****************************************************************
+* Input: pointer to variable in which to put to queue
+* Output: success/fail of operation
+* Function: sets current floor in shared memory
+******************************************************************/
+{
+    return xQueueOverwrite(current_floor_q, p_current_floor);
+}
+
 
 INT8U floor_name2loc(INT8U name)
 /*****************************************************************
@@ -88,7 +112,6 @@ extern void elevator_task(void *pvParameters)
     INT8U current_floor = floor_name2loc(2);
     INT8U destination_floor = floor_name2loc(0);
     INT8S travelling_dist = 0;
-    INT8U ch;
     INT8U use_counter = 0;
     INT16U elevator_timer = 0;
     BOOLEAN first_journey = TRUE;
@@ -96,8 +119,10 @@ extern void elevator_task(void *pvParameters)
     TickType_t xLastWakeTime = xTaskGetTickCount();
     while(1)
     {
-        vTaskDelayUntil(&xLastWakeTime, ELEVATOR_TASK_PERIOD_MS / portTICK_RATE_MS);
 
+        set_current_floor(&current_floor); //update shared memory
+
+        vTaskDelayUntil(&xLastWakeTime, ELEVATOR_TASK_PERIOD_MS / portTICK_RATE_MS);
         /*------STATE MACHINE ------*/
         switch(state)
         {
@@ -106,30 +131,34 @@ extern void elevator_task(void *pvParameters)
             {
                 travelling_dist = (INT8S)destination_floor - (INT8S)current_floor;
                 set_led_mode(LED_ACCELERATE);
-
-                ch = 0xFF; //clear
-                xQueueSendToBack(xQueue_lcd, &ch, 0);
-                ch = 'O';
-                xQueueSendToBack(xQueue_lcd, &ch, 0);
-                ch = 'M';
-                xQueueSendToBack(xQueue_lcd, &ch, 0);
-                ch = 'W';
-                xQueueSendToBack(xQueue_lcd, &ch, 0);
-                ch = '!';
-                xQueueSendToBack(xQueue_lcd, &ch, 0);
-
-
+                set_ui_mode(UI_CURRENT_FLOOR);
                 state = ACCELERATE_S;
             }
             break;
         case WAIT_FOR_PASS_S:
+
+            if(get_pass_status() == PASS_ACCEPTED)
+            {
+                set_ui_mode(UI_FLOOR_SELECT);
+                state = SELECT_FLOOR_S;
+            }
+
             break;
         case SELECT_FLOOR_S:
+
+            if(1) //TODO: wait for encoderpress
+            {
+                // TODO: Assign next destination_floor
+                destination_floor = 20; /*TODO: remove*********************************************************************************************************/
+                travelling_dist = (INT8S)destination_floor - (INT8S)current_floor;
+                set_led_mode(LED_ACCELERATE);
+                state = ACCELERATE_S;
+            }
+
             break;
         case ACCELERATE_S:
         {
-            INT8U debug = abs(travelling_dist) * ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS;
-            if(elevator_timer++ == debug)
+            if(elevator_timer++ == abs(travelling_dist) * ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS)
             {
                 set_led_mode(LED_DECELERATE);
                 elevator_timer = 0;
@@ -153,7 +182,7 @@ extern void elevator_task(void *pvParameters)
             {
                 first_journey = FALSE;
                 state = WAIT_FOR_PASS_S;
-            }else if(elevator_timer++ == travelling_dist * DOORS_STAY_OPEN_FOR_MS/ELEVATOR_TASK_PERIOD_MS ) //TODO: Wait some time
+            }else if(elevator_timer++ ==  DOORS_STAY_OPEN_FOR_MS/ELEVATOR_TASK_PERIOD_MS )
             {
                 set_led_mode(LED_IDLE);
                 elevator_timer = 0;

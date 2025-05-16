@@ -3,6 +3,8 @@
 /*************************** Header ******************************/
 /*************************** Include files ***********************/
 /*************************** Defines *****************************/
+#define PASS_ACCEPTED 1
+#define PASS_DECLINED 0
 /*************************** Variables ***************************/
 /*************************** Function ****************************/
 
@@ -13,6 +15,13 @@ extern void password_task(void *pvParameters);
 * Function:
 ******************************************************************/
 
+
+INT8U get_pass_status();
+/*****************************************************************
+* Input:
+* Output: current status of password
+* Function: Looks at buffer pass_accept_q and returns its contents if any or PASS_DECLINED by default
+******************************************************************/
 
 /*************************** End of module ***********************/
 #endif /* PASSWORD_H_ */

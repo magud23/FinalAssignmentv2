@@ -54,6 +54,7 @@
 #define HIGH_PRIO 3
 #define QUEUE_LEN   128
 #define BUFFER_LEN 1
+#define SHARED_MEM_LEN 1
 
 //UART
 #define BAUDRATE 9600
@@ -81,6 +82,10 @@ extern QueueHandle_t adc_q;
 extern QueueHandle_t pass_accept_q;
 extern QueueHandle_t button_q;
 extern QueueHandle_t led_q;
+extern QueueHandle_t ui_mode_q;
+
+//Shared MEM
+extern QueueHandle_t current_floor_q;
 
 /*****************************   Functions   *******************************/
 
@@ -92,13 +97,11 @@ static void setupHardware(void)
 *   Function :
 *****************************************************************************/
 {
-
   // Warning: If you do not initialize the hardware clock, the timings will be inaccurate
   init_systick();
   status_led_init();
   uart0_init(BAUDRATE,DATABITS,STOPBITS, PARITY);
   init_gpio();
-
 }
 
 static INT16U setupInterTaskCommunication(void)
@@ -118,6 +121,12 @@ static INT16U setupInterTaskCommunication(void)
 
     led_q = xQueueCreate(BUFFER_LEN, sizeof(INT8U));
     tmp = tmp && ( led_q != NULL);
+
+    ui_mode_q = xQueueCreate(BUFFER_LEN, sizeof(INT8U));
+    tmp = tmp && ( ui_mode_q != NULL);
+
+    current_floor_q = xQueueCreate(SHARED_MEM_LEN, sizeof(INT8U));
+    tmp = tmp && ( current_floor_q != NULL);
 
     pass_accept_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
     tmp = tmp && ( pass_accept_q != NULL);
