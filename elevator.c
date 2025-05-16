@@ -30,7 +30,9 @@
 #define BROKEN1_S 7
 #define BROKEN2_S 8
 
+//Utility
 #define RESET 0
+#define FULL_REVOLUTION 15
 #define INVALID_FLOOR 99
 #define REMOVED_FLOOR 13
 #define TOP_FLOOR 20
@@ -49,11 +51,11 @@ QueueHandle_t destination_floor_q;
 
 INT8U floor_name2loc(INT8U name)
 /*****************************************************************
-* Input: name of floor
-* Output: location of floor
-* Function: if name is 0-12 location is name,
-* name larger 14-20 location -1 of name
-******************************************************************/
+ * Input: name of floor
+ * Output: location of floor
+ * Function: if name is 0-12 location is name,
+ * name larger 14-20 location -1 of name
+ ******************************************************************/
 {
     INT8U location = INVALID_FLOOR;
     if(name < REMOVED_FLOOR)
@@ -64,13 +66,13 @@ INT8U floor_name2loc(INT8U name)
     return location;
 }
 
-INT8U floor_loc2name(INT8U location)
+INT8U floor_loc2name(INT8U location) //TODO: move to UI task
 /*****************************************************************
-* Input: location of floor
-* Output: name of floor
-* Function: if name is 0-12 location is name,
-* name larger 14-20 location -1 of name
-******************************************************************/
+ * Input: location of floor
+ * Output: name of floor
+ * Function: if name is 0-12 location is name,
+ * name larger 14-20 location -1 of name
+ ******************************************************************/
 {
     INT8U name = INVALID_FLOOR;
     if(location < REMOVED_FLOOR)
@@ -85,10 +87,10 @@ INT8U floor_loc2name(INT8U location)
 
 extern void elevator_task(void *pvParameters)
 /*****************************************************************
-* Input:
-* Output:
-* Function:
-******************************************************************/
+ * Input:
+ * Output:
+ * Function:
+ ******************************************************************/
 {
     INT8U state = FLOOR2_S;
     INT8U current_floor = floor_name2loc(2);
@@ -99,7 +101,7 @@ extern void elevator_task(void *pvParameters)
     INT16U elevator_timer = RESET;
 
     BOOLEAN encoder_push = RESET;
-    INT16S encoder_val, prev_encoder_val;
+    INT16S encoder_val, prev_encoder_val, dest_encoder_val;
 
     BOOLEAN first_journey = TRUE;
 
@@ -136,6 +138,13 @@ extern void elevator_task(void *pvParameters)
             break;
 
         case WAIT_FOR_PASS_S:
+
+            // update previous encoder value
+            xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
+            prev_encoder_val = encoder_val;
+
+            state = SELECT_FLOOR_S;
+
             break;
 
         case SELECT_FLOOR_S:
@@ -162,7 +171,7 @@ extern void elevator_task(void *pvParameters)
                 }
 
                 // send to LCD
-                xQueueOverwrite(destination_floor_q, floor_loc2name(&destination_floor));
+                xQueueOverwrite(destination_floor_q, &destination_floor);
             }
 
             // update previous value
@@ -180,7 +189,7 @@ extern void elevator_task(void *pvParameters)
                 state = DECELERATE_S;
             }
         }
-            break;
+        break;
 
         case DECELERATE_S:
             if(elevator_timer++ == abs(travelling_dist) * ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS ) // correct time has passed based on travelling dist
@@ -229,16 +238,40 @@ extern void elevator_task(void *pvParameters)
             {
                 set_led_mode(LED_OPEN); //stop blinking
                 //TODO: switch encoder direction
+
+                // update destination encoder value
+                xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
+                dest_encoder_val = encoder_val + FULL_REVOLUTION; //TODO: Change direction every other time here
+
                 state = BROKEN2_S;
             }
 
             break;
 
         case BROKEN2_S:
-            if(1) //TODO: Encoder turn + press
+            xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
+            xQueueReceive(encoder_push_q, &encoder_push, portMAX_DELAY);
+
+            if(encoder_push && (encoder_val >= dest_encoder_val)) // encoder has reached destination and is pushed
             {
                 state = WAIT_FOR_PASS_S;
             }
+            else // update selection
+            {
+                // check direction of change
+                if(encoder_val > prev_encoder_val) // up
+                {
+                    //TODO: tell LCD the direction is right or wrong
+                }
+                else if(encoder_val < prev_encoder_val) // down
+                {
+
+                }
+            }
+
+            // update previous value
+            prev_encoder_val = encoder_val;
+
             break;
         }
     }
