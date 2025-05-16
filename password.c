@@ -47,14 +47,10 @@ extern void password_task(void *pvParameters)
     while(1)
     {
         xQueueReceive(key_q, &keypress, portMAX_DELAY);
-//        ch = 'x';
-//        xQueueSendToBack(xQueue_lcd, &ch, 0);
 
         if(keypress == '*')
         {
 
-            ch = 0xFF;
-            xQueueSendToBack(xQueue_lcd, &ch, 0);
             password = 0;
             length = 0;
         }
@@ -65,38 +61,6 @@ extern void password_task(void *pvParameters)
                 // send confirmation to elevator
                 status = PASS_ACCEPTED;
                 xQueueOverwrite(pass_accept_q, &status);
-//
-//                ch = 0xFF; //clear
-//                xQueueSendToBack(xQueue_lcd, &ch, 0);
-//                ch = 'Y';
-//                xQueueSendToBack(xQueue_lcd, &ch, 0);
-//                ch = 'E';
-//                xQueueSendToBack(xQueue_lcd, &ch, 0);
-//                ch = 'S';
-//                xQueueSendToBack(xQueue_lcd, &ch, 0);
-//                ch = '!';
-//                xQueueSendToBack(xQueue_lcd, &ch, 0);
-
-            }
-            else
-            {
-                // send declined to elevator
-                status = PASS_DECLINED;
-                xQueueOverwrite(pass_accept_q, &status);
-
-//                ch = 0xFF; //clear
-//                xQueueSendToBack(xQueue_lcd, &ch, 0);
-//                ch = 'N';
-//                xQueueSendToBack(xQueue_lcd, &ch, 0);
-//                ch = 'O';
-//                xQueueSendToBack(xQueue_lcd, &ch, 0);
-//                ch = '.';
-//                xQueueSendToBack(xQueue_lcd, &ch, 0);
-//                ch = '.';
-//                xQueueSendToBack(xQueue_lcd, &ch, 0);
-//                ch = '.';
-//                xQueueSendToBack(xQueue_lcd, &ch, 0);
-
             }
             password = 0;
             length = 0;

@@ -67,8 +67,6 @@ void status_led_task(void *pvParameters)
 		// Toggle status led
 	    GPIO_PORTD_DATA_R ^= 0x40;
 
-	    uart0_put_q('-');
-
         vTaskDelay(500 / portTICK_RATE_MS); // wait 500 ms.
 	}
 }

@@ -148,10 +148,22 @@ void password_mode()
 {
 
     LCD_print_char(0xff); //clear and home display
+    LCD_print_char('T');
+    LCD_print_char('Y');
+    LCD_print_char('P');
+    LCD_print_char('E');
+    LCD_print_char(' ');
     LCD_print_char('P');
     LCD_print_char('I');
     LCD_print_char('N');
-    LCD_print_char(':');
+
+    move_LCD(0,1);
+    LCD_print_char('T');
+    LCD_print_char('H');
+    LCD_print_char('E');
+    LCD_print_char('N');
+    LCD_print_char(' ');
+    LCD_print_char('#');
 
 }
 
@@ -196,9 +208,7 @@ void UI_task(void *pvParameters)
     while(1)
     {
         vTaskDelay(200 / portTICK_RATE_MS); // wait 20 ms.
-        if(xQueueReceive(ui_mode_q, &ui_mode, 0))
-        {
-        }
+        xQueueReceive(ui_mode_q, &ui_mode, 0);
 
         switch(ui_mode)
         {

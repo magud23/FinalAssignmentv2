@@ -211,7 +211,6 @@ extern void elevator_task(void *pvParameters)
 
         case ACCELERATE_S:
         {
-
             if(elevator_timer++ ==  ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS)
             {
                 elevator_timer = RESET;
@@ -231,7 +230,6 @@ extern void elevator_task(void *pvParameters)
             }
         }
         break;
-
         case DECELERATE_S:
             if(elevator_timer++ ==  ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS ) // correct time has passed based on travelling dist
             {
@@ -259,7 +257,8 @@ extern void elevator_task(void *pvParameters)
                 first_journey = FALSE;
                 set_ui_mode(UI_PASSWORD);
                 state = WAIT_FOR_PASS_S;
-            }else if(elevator_timer++ ==  DOORS_STAY_OPEN_FOR_MS/ELEVATOR_TASK_PERIOD_MS )
+            }
+            else if(elevator_timer++ ==  DOORS_STAY_OPEN_FOR_MS/ELEVATOR_TASK_PERIOD_MS )
             {
                 set_ui_mode(UI_CURRENT_FLOOR);
                 set_led_mode(LED_IDLE);
@@ -293,7 +292,7 @@ extern void elevator_task(void *pvParameters)
             {
                 set_led_mode(LED_OPEN); //stop blinking
                 encoder_dir_is_clockwise = !encoder_dir_is_clockwise;
-                set_ui_mode(UI_CURRENT_FLOOR);
+
                 // update destination encoder value
                 xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
 
@@ -306,6 +305,7 @@ extern void elevator_task(void *pvParameters)
                     dest_encoder_val = encoder_val - FULL_REVOLUTION;
                 }
 
+                set_ui_mode(UI_IDLE);
                 state = BROKEN2_S;
             }
 
