@@ -15,6 +15,7 @@
 #define UI_POT_GOAL        2
 #define UI_ENC_ERROR       3
 #define UI_FLOOR_SELECT    4
+#define UI_PASSWORD        5
 
 void UI_task(void *pvParameters);
 

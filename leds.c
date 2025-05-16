@@ -51,7 +51,7 @@ void set_led_mode(INT8U led_mode)
 *   Function :  Put a LED_mode into buffer for led_task
 *****************************************************************************/
 {
-    xQueueOverwrite(led_q, &led_mode);
+xQueueOverwrite(led_q, &led_mode);
 }
 
 void leds_init(void)
@@ -118,7 +118,6 @@ void leds_task(void *pvParameters)
         }
         break;
     case LED_BROKEN:
-
         if(blink_timer++ == BROKEN_BLINK_PERIOD_MS/LED_TASK_PERIOD_MS)
         {
             blink_timer = 0;
