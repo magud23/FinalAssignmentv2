@@ -157,9 +157,21 @@ void UI_task(void *pvParameters)
             wr_ch_LCD(change_int_to_char1(adc_val % 10));
             break;
 
+        case UI_ENC :
+            if(first_time)
+            {
+                wr_ch_LCD(0xff); //clear and home display
+                wr_str_LCD("TURN ENCODER");
+                first_time = 0;
+            }
+            move_LCD(0,1);
+            wr_str_LCD("                ");
+
+            break;
+
         case UI_ENC_ERROR :
-            wr_ch_LCD(0xff);
-            wr_str_LCD("WRONG!");
+            move_LCD(0,1);
+            wr_str_LCD("WRONG DIRECTION!");
             break;
 
         case UI_FLOOR_SELECT:
