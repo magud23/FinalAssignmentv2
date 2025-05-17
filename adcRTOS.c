@@ -41,11 +41,24 @@ void init_adc()
 }
 
 
-INT16U get_adc()
+BaseType_t get_pot(INT16U *p_adc_val)
+/*****************************************************************************
+*   Input    : Pointer to value to change to value from ADC
+*   Output   : succes of operation
+*   Function : Gets reading of ADC via shared memory
+******************************************************************************/
 {
-    INT16U adc_val = RESET;
-    xQueuePeek(adc_q, &adc_val,0);
-    return adc_val;
+    return xQueuePeek(adc_q, p_adc_val,0);
+}
+
+BaseType_t set_pot(INT16U *p_adc_val)
+/*****************************************************************************
+*   Input    : Pointer to value to put to shared memory
+*   Output   : succes of operation
+*   Function : Sets reading of ADC via shared memory
+******************************************************************************/
+{
+    return xQueueOverwrite(adc_q, p_adc_val);
 }
 
 void adc_task(void *pvParameters)
@@ -56,7 +69,7 @@ void adc_task(void *pvParameters)
     while(1)
     {
         adc_val = read_adc();
-        xQueueOverwrite(adc_q, &adc_val);
+        set_pot(&adc_val);
         vTaskDelay(20 / portTICK_RATE_MS); // wait 20 ms.
     }
 }
