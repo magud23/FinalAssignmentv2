@@ -1,20 +1,20 @@
 
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded C Programming (ECP)
-*
-* PROJECT....: FINAL ASSIGNEMNT
-*
-* DESCRIPTION: Main file
-*
-* Change Log:
-******************************************************************************
-* Date    Id    Change
-* YYMMDD
-* --------------------
-* 080525  MKG    project created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ * Embedded C Programming (ECP)
+ *
+ * PROJECT....: FINAL ASSIGNEMNT
+ *
+ * DESCRIPTION: Main file
+ *
+ * Change Log:
+ ******************************************************************************
+ * Date    Id    Change
+ * YYMMDD
+ * --------------------
+ * 080525  MKG    project created.
+ *
+ *****************************************************************************/
 
 /***************************** Include files *******************************/
 //FreeRTOS
@@ -90,24 +90,24 @@ extern QueueHandle_t adc_q;
 
 static void setupHardware(void)
 /*****************************************************************************
-*   Input    :  -
-*   Output   :  -
-*   Function :
-*****************************************************************************/
+ *   Input    :  -
+ *   Output   :  -
+ *   Function :
+ *****************************************************************************/
 {
-  // Warning: If you do not initialize the hardware clock, the timings will be inaccurate
-  init_systick();
-  status_led_init();
-  uart0_init(BAUDRATE,DATABITS,STOPBITS, PARITY);
-  init_gpio();
+    // Warning: If you do not initialize the hardware clock, the timings will be inaccurate
+    init_systick();
+    status_led_init();
+    uart0_init(BAUDRATE,DATABITS,STOPBITS, PARITY);
+    init_gpio();
 }
 
 BOOLEAN setupInterTaskCommunication(void)
 /*****************************************************************************
-*   Input    :  -
-*   Output   :  TRUE/FALSE
-*   Function :  Do all queues get created correctly
-*****************************************************************************/
+ *   Input    :  -
+ *   Output   :  TRUE/FALSE
+ *   Function :  Do all queues get created correctly
+ *****************************************************************************/
 {
     BOOLEAN tmp = TRUE;
     uart_rx_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
@@ -153,7 +153,7 @@ BOOLEAN setupInterTaskCommunication(void)
     xSemaphore_lcd = xSemaphoreCreateMutex();
     tmp = tmp && ( xSemaphore_lcd != NULL);
 
-     return tmp;
+    return tmp;
 }
 
 
@@ -163,20 +163,23 @@ int main(void)
     setupHardware();
 
     if(setupInterTaskCommunication()){
-           xTaskCreate( status_led_task, "Status_led", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
-           xTaskCreate( uart_rx_task, "Uart rx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
-           xTaskCreate( uart_tx_task, "Uart tx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
-           xTaskCreate( adc_task, "ADC (potmeter)", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
-           xTaskCreate( key_task, "Keypad", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
-           xTaskCreate( button_task, "Button ", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
-           xTaskCreate( password_task, "password", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
-           xTaskCreate( leds_task, "LEDS", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
-           xTaskCreate( encoder_task, "Encoder driver", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
-           xTaskCreate( lcd_task, "LCD driver", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
-           xTaskCreate( UI_task, "UI task", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
-           xTaskCreate( elevator_task, "Elevator", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL );
 
-           vTaskStartScheduler();
+        if(     xTaskCreate( status_led_task, "Status_led", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL ) == pdPASS &&
+                xTaskCreate( uart_rx_task, "Uart rx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL ) == pdPASS &&
+                xTaskCreate( uart_tx_task, "Uart tx", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL ) == pdPASS &&
+                xTaskCreate( adc_task, "ADC (potmeter)", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL ) == pdPASS &&
+                xTaskCreate( key_task, "Keypad", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL) == pdPASS &&
+                xTaskCreate( button_task, "Button ", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL) == pdPASS &&
+                xTaskCreate( password_task, "password", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL) == pdPASS &&
+                xTaskCreate( leds_task, "LEDS", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL ) == pdPASS &&
+                xTaskCreate( encoder_task, "Encoder driver", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL ) == pdPASS &&
+                xTaskCreate( lcd_task, "LCD driver", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL ) == pdPASS &&
+                xTaskCreate( UI_task, "UI task", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL ) == pdPASS &&
+                xTaskCreate( elevator_task, "Elevator", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL ) == pdPASS
+        )
+        {
+            vTaskStartScheduler();
+        }
     }
     return 0;
 }
