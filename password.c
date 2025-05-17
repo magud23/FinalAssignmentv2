@@ -18,7 +18,7 @@
 /*************************** Constants ***************************/
 /*************************** Variables ***************************/
 QueueHandle_t pass_accept_q;
-QueueHandle_t password_q;
+QueueHandle_t password_length_q;
 
 extern QueueHandle_t key_q;
 extern QueueHandle_t xQueue_lcd;
@@ -30,6 +30,12 @@ INT8U get_pass_status()
     xQueueReceive(pass_accept_q, &ch, 0);
     return ch;
 }
+
+BaseType_t get_typed_pass_length(INT8U * ptr_len)
+{
+    xQueuePeek(password_length_q, ptr_len, portMAX_DELAY);
+}
+
 
 
 extern void password_task(void *pvParameters)
@@ -51,7 +57,7 @@ extern void password_task(void *pvParameters)
             {
                 password = RESET;
                 length = RESET;
-                xQueueOverwrite(password_q, &length);
+                xQueueOverwrite(password_length_q, &length);
             }
             else if(keypress == '#')
             {
@@ -63,14 +69,14 @@ extern void password_task(void *pvParameters)
                 }
                 password = RESET;
                 length = RESET;
-                xQueueOverwrite(password_q, &length);
+                xQueueOverwrite(password_length_q, &length);
             }
             else
             {
                 password = password*(INT16U)10; // move decimal left
                 password += (INT16U)keypress - '0';
                 length++;
-                xQueueOverwrite(password_q, &length);
+                xQueueOverwrite(password_length_q, &length);
             }
         }
     }

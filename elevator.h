@@ -97,9 +97,16 @@ BaseType_t set_current_floor(INT8U current_floor);
 * Function: sets current floor in shared memory
 ******************************************************************/
 
-void set_destination_floor(INT8U destination_floor);
+BaseType_t get_destination_floor(INT8U * p_destination_floor);
 /*****************************************************************
-* Input: variable which to put to queue
+* Input: pointer in which to put the value returned from shared memory
+* Output: success/fail of operation
+* Function: gets dest floor from shared memory
+******************************************************************/
+
+BaseType_t set_destination_floor(INT8U * destination_floor);
+/*****************************************************************
+* Input: pointer to variable
 * Output: success/fail of operation
 * Function: sets destination floor in shared memory
 ******************************************************************/

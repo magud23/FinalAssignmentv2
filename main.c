@@ -74,7 +74,7 @@ extern SemaphoreHandle_t xSemaphore_lcd;
 
 //Buffers
 extern QueueHandle_t adc_q;
-extern QueueHandle_t password_q;
+extern QueueHandle_t password_length_q;
 extern QueueHandle_t pass_accept_q;
 extern QueueHandle_t button_q;
 extern QueueHandle_t led_q;
@@ -130,8 +130,8 @@ BOOLEAN setupInterTaskCommunication(void)
     destination_floor_q = xQueueCreate(BUFFER_LEN, sizeof(INT8U));
     tmp = tmp && ( destination_floor_q != NULL);
 
-    password_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
-    tmp = tmp && ( password_q != NULL);
+    password_length_q = xQueueCreate(BUFFER_LEN, sizeof(INT16U));
+    tmp = tmp && ( password_length_q != NULL);
 
     pass_accept_q = xQueueCreate(BUFFER_LEN, sizeof(INT8U));
     tmp = tmp && ( pass_accept_q != NULL);

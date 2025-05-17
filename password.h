@@ -25,5 +25,14 @@ INT8U get_pass_status();
 * Function: Looks at buffer pass_accept_q and returns its contents if any or PASS_DECLINED by default
 ******************************************************************/
 
+BaseType_t get_typed_pass_length(INT8U * ptr_len);
+/*****************************************************************
+* Input: ptr to variable
+* Output: succes?
+* Function: updates variable to length stored in buffer
+******************************************************************/
+
+
+
 /*************************** End of module ***********************/
 #endif /* PASSWORD_H_ */

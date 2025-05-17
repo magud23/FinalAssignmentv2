@@ -1,5 +1,6 @@
 /****************************     Header     ******************************/
 #include "UI_task.h"
+
 /*****************************   Functions   *******************************/
 
 BaseType_t get_ui_mode(INT8U *pv_ui_mode)
@@ -51,11 +52,11 @@ void UI_task(void *pvParameters)
 
     INT8U ui_mode = UI_IDLE;
     BOOLEAN first_time = TRUE;
-    INT8U previous_floor = RESET;
+    INT8U password_len = RESET;
+	INT8U previous_floor = RESET;
     INT8U dest_floor = RESET;
     INT8U current_floor = RESET;
-
-
+    
     while(1)
     {
         vTaskDelay(100 / portTICK_RATE_MS); // wait 20 ms.
@@ -134,7 +135,7 @@ void UI_task(void *pvParameters)
 
             // update number on second line
             move_LCD(0,1);
-            xQueuePeek(destination_floor_q, &dest_floor, portMAX_DELAY);
+            get_destination_floor(&dest_floor);
             wr_ch_LCD(change_int_to_char1(dest_floor/10 % 10));
             wr_ch_LCD(change_int_to_char1(dest_floor % 10));
             break;
@@ -150,8 +151,8 @@ void UI_task(void *pvParameters)
             // update number on second line
             move_LCD(0,1);
 
-            INT8U password_len = RESET;
-            xQueuePeek(password_q, &password_len, portMAX_DELAY);
+            get_typed_pass_length(&password_len);
+
             int i;
             for (i=0; i<PASS_LENGTH; i++)
             {
