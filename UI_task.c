@@ -32,6 +32,7 @@
 #include "lcd.h"
 #include "elevator.h"
 #include "password.h"
+#include "glob_def.h"
 
 
 /*****************************    Defines    *******************************/
@@ -99,7 +100,11 @@ void UI_task(void *pvParameters)
 {
 
     INT8U ui_mode = UI_IDLE;
-    BOOLEAN first_time = 1;
+    BOOLEAN first_time = TRUE;
+    INT8U previous_floor = 0;
+    INT8U dest_floor = 0;
+    INT8U current_floor = 0;
+
 
     while(1)
     {
@@ -108,9 +113,8 @@ void UI_task(void *pvParameters)
         //set first time for static text
         if (get_ui_mode(&ui_mode) == pdTRUE)
         {
-            first_time = 1;
+            first_time = TRUE;
         }
-
         switch(ui_mode)
         {
         case UI_IDLE:
@@ -118,34 +122,31 @@ void UI_task(void *pvParameters)
             break;
 
         case UI_CURRENT_FLOOR:
+            get_current_floor(&current_floor);
             if(first_time)
             {
                 wr_ch_LCD(0xff); //clear and home display
                 wr_str_LCD("CURRENT FLOOR:");
-                first_time = 0;
-            }
-            // update number on second line
-            move_LCD(0,1);
+                first_time = FALSE;
 
-            static INT8U previous_floor = 0;
-            INT8U current_floor = previous_floor;
-
-            get_current_floor(&current_floor);
-
-            if(previous_floor != current_floor)
-            {
-                previous_floor = current_floor;
+                move_LCD(0,1);
                 wr_ch_LCD(change_int_to_char1(current_floor/10 % 10));
                 wr_ch_LCD(change_int_to_char1(current_floor % 10));
             }
-
+            else if(previous_floor != current_floor)
+            {
+                move_LCD(0,1);
+                wr_ch_LCD(change_int_to_char1(current_floor/10 % 10));
+                wr_ch_LCD(change_int_to_char1(current_floor % 10));
+            }
+            previous_floor = current_floor;
             break;
 
         case UI_POT_GOAL:
             if(first_time)
             {
                 pot_goal_mode();
-                first_time = 0;
+                first_time = FALSE;
             }
             // update number on second line
             INT16U adc_val = get_adc();
@@ -166,12 +167,11 @@ void UI_task(void *pvParameters)
             {
                 wr_ch_LCD(0xff); //clear and home display
                 wr_str_LCD("SELECT FLOOR:");
-                first_time = 0;
+                first_time = FALSE;
             }
 
             // update number on second line
             move_LCD(0,1);
-            INT8U dest_floor = 0;
             xQueuePeek(destination_floor_q, &dest_floor, portMAX_DELAY);
             wr_ch_LCD(change_int_to_char1(dest_floor/10 % 10));
             wr_ch_LCD(change_int_to_char1(dest_floor % 10));

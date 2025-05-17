@@ -6,11 +6,11 @@
 /*************************** Variables ***************************/
 /*************************** Function ****************************/
 
-extern void elevator_task(void *pvParameters);
+void elevator_task(void *pvParameters);
 /*****************************************************************
-* Input:
-* Output:
-* Function:
+* Input: -
+* Output: -
+* Function: The brains of the elevator (FSM)
 ******************************************************************/
 
 INT8U floor_name2loc(INT8U name);

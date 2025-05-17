@@ -25,13 +25,6 @@ INT16U read_adc()
   return( ADC0_SSFIFO3_R );
 }
 
-INT16U get_adc()
-{
-    INT16U adc_val = 0;
-    xQueuePeek(adc_q, &adc_val,0);
-    return adc_val;
-}
-
 init_adc()
 {
   SYSCTL_RCGC0_R |= SYSCTL_RCGC0_ADC0;
@@ -64,6 +57,12 @@ init_adc()
 }
 
 
+INT16U get_adc()
+{
+    INT16U adc_val = 0;
+    xQueuePeek(adc_q, &adc_val,0);
+    return adc_val;
+}
 
 void adc_task(void *pvParameters)
 {

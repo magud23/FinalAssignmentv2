@@ -108,14 +108,14 @@ static void setupHardware(void)
   init_gpio();
 }
 
-static INT16U setupInterTaskCommunication(void)
+BOOLEAN setupInterTaskCommunication(void)
 /*****************************************************************************
 *   Input    :  -
-*   Output   :  -
-*   Function :
+*   Output   :  TRUE/FALSE
+*   Function :  Do all queues get created correctly
 *****************************************************************************/
 {
-    INT16U tmp = TRUE;
+    BOOLEAN tmp = TRUE;
     uart_rx_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
     uart_tx_q = xQueueCreate(QUEUE_LEN, sizeof(INT8U));
     tmp = (uart_rx_q != NULL) && (uart_tx_q != NULL);

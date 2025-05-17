@@ -43,10 +43,6 @@
 
 /*************************** Constants ***************************/
 /*************************** Variables ***************************/
-extern QueueHandle_t xQueue_lcd;
-extern QueueHandle_t encoder_pos_q;
-extern QueueHandle_t encoder_push_q;
-
 QueueHandle_t destination_floor_q;
 QueueHandle_t current_floor_q;
 
@@ -124,12 +120,12 @@ INT16U current_floor_to_randomlike_reference(INT8U current_floor)
 }
 
 
-extern void elevator_task(void *pvParameters)
+void elevator_task(void *pvParameters)
 /*****************************************************************
- * Input:
- * Output:
- * Function:
- ******************************************************************/
+* Input: -
+* Output: -
+* Function: The brains of the elevator (FSM)
+******************************************************************/
 {
     INT8U state = FLOOR2_S;
     INT8U current_floor = floor_name2loc(2);
@@ -141,12 +137,12 @@ extern void elevator_task(void *pvParameters)
     INT16S encoder_val, prev_encoder_val, dest_encoder_val;
     BOOLEAN first_journey = TRUE;
     BOOLEAN encoder_dir_is_up = TRUE;
-
+    set_current_floor(floor_loc2name(current_floor));       //update shared memory
 
     TickType_t xLastWakeTime = xTaskGetTickCount();
     while(1)
     {
-        set_current_floor(floor_loc2name(current_floor));       //update shared memory
+
         vTaskDelayUntil(&xLastWakeTime, ELEVATOR_TASK_PERIOD_MS / portTICK_RATE_MS);
 
         /*------STATE MACHINE ------*/
@@ -168,14 +164,14 @@ extern void elevator_task(void *pvParameters)
             {
                 set_ui_mode(UI_FLOOR_SELECT);
                 state = SELECT_FLOOR_S;
-                xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
+                get_encoder_pos(&encoder_val);
                 prev_encoder_val = encoder_val;
             }
             break;
 
         case SELECT_FLOOR_S:
-            xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
-            xQueueReceive(encoder_push_q, &encoder_push, portMAX_DELAY);
+            get_encoder_pos(&encoder_val);
+            get_encoder_push(&encoder_push);
 
             if(encoder_push)                                                // select the floor
             {
@@ -220,6 +216,7 @@ extern void elevator_task(void *pvParameters)
                     set_led_mode(LED_DECELERATE);
                     state = DECELERATE_S;
                 }
+                set_current_floor(floor_loc2name(current_floor));       //update shared memory
             }
         }
         break;
@@ -241,6 +238,7 @@ extern void elevator_task(void *pvParameters)
                     set_led_mode(LED_OPEN);
                     state = DOORS_OPEN_S;
                 }
+                set_current_floor(floor_loc2name(current_floor));       //update shared memory
             }
             break;
 
@@ -284,7 +282,7 @@ extern void elevator_task(void *pvParameters)
             if(get_adc() == current_floor_to_randomlike_reference(floor_loc2name(current_floor))) //POT is a MATCH
             {
                 encoder_dir_is_up = !encoder_dir_is_up;                         //Flip direction each time
-                xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
+                get_encoder_pos(&encoder_val);
                 if(encoder_dir_is_up)                                           // update destination encoder value (dependent on desired direction)
                 {
                     dest_encoder_val = encoder_val + FULL_REVOLUTION;
@@ -300,8 +298,8 @@ extern void elevator_task(void *pvParameters)
             break;
 
         case BROKEN2_S:
-            xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);      //Get newest encoder pos
-            xQueueReceive(encoder_push_q, &encoder_push, portMAX_DELAY);    //Get newest encoder push
+            get_encoder_pos(&encoder_val);                                  //Get newest encoder pos
+            get_encoder_push(&encoder_push);                                //Get newest encoder push
             if(encoder_push && ( ((encoder_val >= dest_encoder_val) && encoder_dir_is_up) || ((encoder_val <= dest_encoder_val) && !encoder_dir_is_up) )) // encoder has reached destination and is pushed
             {
                 state = WAIT_FOR_PASS_S;

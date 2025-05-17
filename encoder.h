@@ -34,6 +34,20 @@
 
 /*****************************   Functions   *******************************/
 
+BaseType_t get_encoder_pos(INT8U * p_val);
+/*****************************************************************
+* Input: pointer in which to put the value returned from shared memory
+* Output: success/fail of operation
+* Function: gets position of encoder from shared memory
+******************************************************************/
+
+BaseType_t get_encoder_push(INT8U * p_val);
+/*****************************************************************
+* Input: pointer in which to put the value returned from buffer
+* Output: success/fail of operation
+* Function: gets push from buffer
+******************************************************************/
+
 void encoder_init(void);
 /*****************************************************************************
  *   Input    : -

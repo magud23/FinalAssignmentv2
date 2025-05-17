@@ -44,6 +44,27 @@ QueueHandle_t encoder_push_q;
 
 /*****************************   Functions   *******************************/
 
+BaseType_t get_encoder_pos(INT8U * p_val)
+/*****************************************************************
+* Input: pointer in which to put the value returned from shared memory
+* Output: success/fail of operation
+* Function: gets position of encoder from shared memory
+******************************************************************/
+{
+    return xQueuePeek(encoder_pos_q, p_val,0);
+}
+
+BaseType_t get_encoder_push(INT8U * p_val)
+/*****************************************************************
+* Input: pointer in which to put the value returned from buffer
+* Output: success/fail of operation
+* Function: gets push from buffer
+******************************************************************/
+{
+    return xQueueReceive(encoder_push_q, p_val,0);
+}
+
+
 void encoder_init(void)
 {
     //enable clock for GPIO Port A
