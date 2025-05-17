@@ -34,7 +34,6 @@
 #define BROKEN2_S 8
 
 //Utility
-#define RESET 0
 #define FULL_REVOLUTION 15
 #define INVALID_FLOOR 99
 #define REMOVED_FLOOR 13
@@ -130,7 +129,7 @@ void elevator_task(void *pvParameters)
     INT8U state = FLOOR2_S;
     INT8U current_floor = floor_name2loc(2);
     INT8U destination_floor = floor_name2loc(0);
-    INT8S travel_dist = 0;
+    INT8S travel_dist = RESET;
     INT8U use_counter = RESET;
     INT16U elevator_timer = RESET;
     BOOLEAN encoder_push = RESET;

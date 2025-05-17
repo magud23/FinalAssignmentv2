@@ -24,6 +24,7 @@
 #include "Task.h"
 #include "queue.h"
 #include "semphr.h"
+#include "glob_def.h"
 #include "emp_type.h"
 #include "adcRTOS.h"
 #include "leds.h"
@@ -84,7 +85,7 @@ void leds_task(void *pvParameters)
 {
   leds_init();
   INT8U led_mode = LED_IDLE;
-  INT16U blink_timer = 0;
+  INT16U blink_timer = RESET;
 
   while(1)
   {
@@ -92,7 +93,7 @@ void leds_task(void *pvParameters)
     if(xQueueReceive(led_q, &led_mode, 0))
     {
         //if there is anything in the buffer, reset the blink_timer and shut off a
-        blink_timer = 0;
+        blink_timer = RESET;
         GPIO_PORTF_DATA_R |= (RED_MASK|YELLOW_MASK|GREEN_MASK); //shut off all
     }
 
@@ -106,21 +107,21 @@ void leds_task(void *pvParameters)
     case LED_ACCELERATE:
         if(blink_timer++ == MOVE_BLINK_PERIOD_MS/LED_TASK_PERIOD_MS)
         {
-            blink_timer = 0;
+            blink_timer = RESET;
             GPIO_PORTF_DATA_R ^= YELLOW_MASK;
         }
         break;
     case LED_DECELERATE:
         if(blink_timer++ == MOVE_BLINK_PERIOD_MS/LED_TASK_PERIOD_MS)
         {
-            blink_timer = 0;
+            blink_timer = RESET;
             GPIO_PORTF_DATA_R ^= RED_MASK;
         }
         break;
     case LED_BROKEN:
         if(blink_timer++ == BROKEN_BLINK_PERIOD_MS/LED_TASK_PERIOD_MS)
         {
-            blink_timer = 0;
+            blink_timer = RESET;
             GPIO_PORTF_DATA_R ^= (RED_MASK|YELLOW_MASK|GREEN_MASK);
         }
         break;

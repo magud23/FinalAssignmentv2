@@ -101,9 +101,9 @@ void UI_task(void *pvParameters)
 
     INT8U ui_mode = UI_IDLE;
     BOOLEAN first_time = TRUE;
-    INT8U previous_floor = 0;
-    INT8U dest_floor = 0;
-    INT8U current_floor = 0;
+    INT8U previous_floor = RESET;
+    INT8U dest_floor = RESET;
+    INT8U current_floor = RESET;
 
 
     while(1)
@@ -162,7 +162,7 @@ void UI_task(void *pvParameters)
             {
                 wr_ch_LCD(0xff); //clear and home display
                 wr_str_LCD("TURN ENCODER");
-                first_time = 0;
+                first_time = RESET;
             }
             move_LCD(0,1);
             wr_str_LCD("                ");
@@ -194,13 +194,13 @@ void UI_task(void *pvParameters)
             {
                 wr_ch_LCD(0xff); //clear and home display
                 wr_str_LCD("TYPE PIN THEN #");
-                first_time = 0;
+                first_time = RESET;
             }
 
             // update number on second line
             move_LCD(0,1);
 
-            INT8U password_len = 0;
+            INT8U password_len = RESET;
             xQueuePeek(password_q, &password_len, portMAX_DELAY);
             int i;
             for (i=0; i<PASS_LENGTH; i++)

@@ -253,7 +253,7 @@ void lcd_task( void *pvParameters )
       switch( my_state )
       {
         case LCD_POWER_UP:
-          LCD_init = 0;
+          LCD_init = RESET;
           my_state = LCD_INIT;
           vTaskDelay(100 / portTICK_RATE_MS); // wait 100 ms.
           break;
