@@ -5,7 +5,7 @@
 
 BaseType_t get_current_floor(INT8U * p_current_floor)
 /*****************************************************************
-* Input: pointer in which to put the value returned from shared memory
+* Input: pointer in which to put the value returned from buffer
 * Output: success/fail of operation
 * Function: gets current floor from buffer
 ******************************************************************/
@@ -13,14 +13,15 @@ BaseType_t get_current_floor(INT8U * p_current_floor)
     return xQueuePeek(current_floor_q, p_current_floor,0);
 }
 
-BaseType_t set_current_floor(INT8U current_floor)
+BaseType_t set_current_floor(INT8U * current_floor)
 /*****************************************************************
 * Input:  variable which to put to shared memory (OBS: not pointer)
 * Output: success/fail of operation
 * Function: sets current floor in buffer
 ******************************************************************/
 {
-    return xQueueOverwrite(current_floor_q, &current_floor);
+    INT8U temp = floor_loc2name( *current_floor);
+    return xQueueOverwrite(current_floor_q, &temp);
 }
 
 
@@ -39,8 +40,8 @@ BaseType_t set_destination_floor(INT8U *destination_floor)
 * Output: success/fail of operation
 * Function: sets destination floor in buffer
 ******************************************************************/
-{
-    return xQueueOverwrite(destination_floor_q, destination_floor);
+{   INT8U temp = floor_loc2name(*destination_floor);
+    return xQueueOverwrite(destination_floor_q, &temp);
 }
 
 
@@ -102,7 +103,7 @@ void elevator_task(void *pvParameters)
     INT16S encoder_val, prev_encoder_val, dest_encoder_val;
     BOOLEAN first_journey = TRUE;
     BOOLEAN encoder_dir_is_up = TRUE;
-    set_current_floor(floor_loc2name(current_floor));       //update shared memory
+    set_current_floor(&current_floor);       //update shared memory
 
     TickType_t xLastWakeTime = xTaskGetTickCount();
     while(1)
@@ -156,8 +157,7 @@ void elevator_task(void *pvParameters)
                     destination_floor = (destination_floor-1);              //needed to be split in two lines, something up with overflow
                     destination_floor = destination_floor % TOP_FLOOR;      // decrement within floor loc's
                 }
-                INT8U temp = floor_loc2name(destination_floor);
-                set_destination_floor(&temp);   // send to LCD
+                set_destination_floor(&destination_floor);   // send to LCD
             }
 
             // update previous value
@@ -182,7 +182,7 @@ void elevator_task(void *pvParameters)
                     set_led_mode(LED_DECELERATE);
                     state = DECELERATE_S;
                 }
-                set_current_floor(floor_loc2name(current_floor));       //update shared memory
+                set_current_floor(&current_floor);       //update shared memory
             }
         }
         break;
@@ -204,7 +204,7 @@ void elevator_task(void *pvParameters)
                     set_led_mode(LED_OPEN);
                     state = DOORS_OPEN_S;
                 }
-                set_current_floor(floor_loc2name(current_floor));       //update shared memory
+                set_current_floor(&current_floor);       //update shared memory
             }
             break;
 
