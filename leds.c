@@ -16,33 +16,7 @@
 * 050128  KA    Module created.
 *
 *****************************************************************************/
-
-/***************************** Include files *******************************/
-#include <stdint.h>
-#include "tm4c123gh6pm.h"
-#include "FreeRTOS.h"
-#include "Task.h"
-#include "queue.h"
-#include "semphr.h"
-#include "glob_def.h"
-#include "emp_type.h"
-#include "adcRTOS.h"
 #include "leds.h"
-
-/*****************************    Defines    *******************************/
-#define LED_TASK_PERIOD_MS 10
-#define MOVE_BLINK_PERIOD_MS 200
-#define BROKEN_BLINK_PERIOD_MS 100
-
-#define RED_MASK 0x02
-#define YELLOW_MASK 0x04
-#define GREEN_MASK 0x08
-
-
-/*****************************   Constants   *******************************/
-
-/*****************************   Variables   *******************************/
-QueueHandle_t led_q;
 /*****************************   Functions   *******************************/
 
 void set_led_mode(INT8U led_mode)

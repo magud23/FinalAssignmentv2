@@ -17,30 +17,7 @@
  *
  *****************************************************************************/
 
-/***************************** Include files *******************************/
-#include <stdint.h>
-#include "tm4c123gh6pm.h"
-#include "FreeRTOS.h"
-#include "glob_def.h"
-#include "queue.h"
-#include "emp_type.h"
 #include "encoder.h"
-
-/*****************************    Defines    *******************************/
-#define PA5 0x20
-#define PA6 0x40
-#define PA7 0x80
-#define DELAY   1 // 1 ms
-#define CHANGE_ON_A 0x02
-#define CHANGE_ON_B 0x01
-
-/*****************************   Constants   *******************************/
-
-
-/*****************************   Variables   *******************************/
-
-QueueHandle_t encoder_pos_q;
-QueueHandle_t encoder_push_q;
 
 /*****************************   Functions   *******************************/
 

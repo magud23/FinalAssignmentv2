@@ -18,13 +18,23 @@
 *****************************************************************************/
 
 #ifndef _ADC_H
-  #define _ADC_H
-
+#define _ADC_H
 /***************************** Include files *******************************/
+#include <stdint.h>
+#include "tm4c123gh6pm.h"
+#include "emp_type.h"
+#include "FreeRTOS.h"
+#include "glob_def.h"
+#include "Task.h"
+#include "queue.h"
 
 /*****************************    Defines    *******************************/
 #define MAX_POT_VAL 4095
+
 /*****************************   Constants   *******************************/
+
+/*****************************   Variables   *******************************/
+QueueHandle_t adc_q;
 
 /*****************************   Functions   *******************************/
 

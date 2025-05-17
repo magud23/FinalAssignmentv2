@@ -1,22 +1,5 @@
-// -----------------
-// adc.c
-// -----------------
-/***************************** Include files *******************************/
-#include <stdint.h>
-#include "tm4c123gh6pm.h"
-#include "emp_type.h"
-#include "FreeRTOS.h"
-#include "glob_def.h"
-#include "Task.h"
-#include "queue.h"
-
-
-/*****************************    Defines    *******************************/
-
-/*****************************   Constants   *******************************/
-
-/*****************************   Variables   *******************************/
-QueueHandle_t adc_q;
+/*****************************    Headers    *******************************/
+#include "adcRTOS.h"
 
 /*****************************   Functions   *******************************/
 
@@ -26,7 +9,7 @@ INT16U read_adc()
   return( ADC0_SSFIFO3_R );
 }
 
-init_adc()
+void init_adc()
 {
   SYSCTL_RCGC0_R |= SYSCTL_RCGC0_ADC0;
   SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOB;

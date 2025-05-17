@@ -16,31 +16,7 @@
 * 090215  MoH   Module created.
 * 250512  MKG   Modified for freeRTOS
 *****************************************************************************/
-
-/***************************** Include files *******************************/
-#include <stdint.h>
-#include "tm4c123gh6pm.h"
-#include "emp_type.h"
-#include "FreeRTOS.h"
-#include "Task.h"
-#include "queue.h"
 #include "button.h"
-
-/*****************************    Defines    *******************************/
-#define BS_IDLE           0
-#define BS_FIRST_PUSH     1
-#define BS_FIRST_RELEASE  2
-#define BS_SECOND_PUSH    3
-#define BS_LONG_PUSH      4
-
-#define PERIOD_MS         5
-#define TIM_2_SEC         2000/PERIOD_MS
-#define TIM_100_MSEC      100/PERIOD_MS
-
-/*****************************   Constants   *******************************/
-
-/*****************************   Variables   *******************************/
-QueueHandle_t button_q;
 
 /*****************************   Functions   *******************************/
 INT8U button_pushed()
@@ -51,7 +27,7 @@ INT8U button_pushed()
 
 INT8U get_button_event()
 {
-    INT8U ch = GE_NO_EVENT;
+    INT8U ch = BS_IDLE;
     xQueueReceive(button_q, &ch, 0);
     return ch;
 }
