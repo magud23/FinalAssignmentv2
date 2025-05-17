@@ -87,11 +87,7 @@ extern QueueHandle_t destination_floor_q;
 //Shared MEM
 extern QueueHandle_t current_floor_q;
 
-
-
-
 /*****************************   Functions   *******************************/
-
 
 static void setupHardware(void)
 /*****************************************************************************

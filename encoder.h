@@ -19,13 +19,20 @@
 
 #ifndef _ENCODER_H
 #define _ENCODER_H
-
-/***************************** Include files *******************************/
+/*************************** Header ******************************/
+/*************************** Include files ***********************/
 #include <stdint.h>
-#include "tm4c123gh6pm.h"
+
+//FreeRTOS
 #include "FreeRTOS.h"
+#include "systick_frt.h"
 #include "queue.h"
+
+//Course
+#include "tm4c123gh6pm.h"
 #include "emp_type.h"
+
+//Modules
 #include "gpio.h"
 
 /*****************************    Defines    *******************************/

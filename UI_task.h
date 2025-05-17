@@ -17,21 +17,10 @@
 
 //Modules
 #include "glob_def.h"
-#include "adcRTOS.h"
-#include "leds.h"
 #include "lcd.h"
 #include "encoder.h"
-#include "UI_task.h"
-#include "elevator.h"
-#include "keyRTOS.h"
-#include "password.h"
-#include "button.h"
-
-#include "encoder.h"
-#include "lcd.h"
 #include "elevator.h"
 #include "password.h"
-#include "glob_def.h"
 
 /***************************     Defines     *******************************/
 //STATES
