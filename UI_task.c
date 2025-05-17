@@ -42,14 +42,9 @@
 #define offset_state  2
 /*****************************   Constants   *******************************/
 
-/*INT16U min_in 0;
-INT16U max_in 4095;
-INT16U min_out 100;
-INT16U max_out 1000; */
-
 /*****************************   Variables   *******************************/
 QueueHandle_t ui_mode_q;
-extern QueueHandle_t encoder_pos_q, xQueue_lcd, destination_floor_q, password_q;
+
 /*****************************   Functions   *******************************/
 
 BaseType_t get_ui_mode(INT8U *pv_ui_mode)
@@ -104,6 +99,7 @@ void UI_task(void *pvParameters)
     INT8U previous_floor = 0;
     INT8U dest_floor = 0;
     INT8U current_floor = 0;
+    INT8U password_len = 0;
 
 
     while(1)
@@ -184,7 +180,7 @@ void UI_task(void *pvParameters)
 
             // update number on second line
             move_LCD(0,1);
-            xQueuePeek(destination_floor_q, &dest_floor, portMAX_DELAY);
+            get_destination_floor(&dest_floor);
             wr_ch_LCD(change_int_to_char1(dest_floor/10 % 10));
             wr_ch_LCD(change_int_to_char1(dest_floor % 10));
             break;
@@ -199,9 +195,7 @@ void UI_task(void *pvParameters)
 
             // update number on second line
             move_LCD(0,1);
-
-            INT8U password_len = 0;
-            xQueuePeek(password_q, &password_len, portMAX_DELAY);
+            get_typed_pass_length(&password_len);
             int i;
             for (i=0; i<PASS_LENGTH; i++)
             {
