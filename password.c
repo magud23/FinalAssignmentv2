@@ -33,7 +33,7 @@ INT8U get_pass_status()
 
 BaseType_t get_typed_pass_length(INT8U * ptr_len)
 {
-    xQueuePeek(password_length_q, ptr_len, portMAX_DELAY);
+    return xQueuePeek(password_length_q, ptr_len, portMAX_DELAY);
 }
 
 

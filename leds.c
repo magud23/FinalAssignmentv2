@@ -62,12 +62,10 @@ void leds_init(void)
 *   Function : Init LEDs
 *****************************************************************************/
 {
-  INT8S dummy;
   // Enable the GPIO port that is used for the on-board LED.
   SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOF;
 
-  // Do a dummy read to insert a few cycles after enabling the peripheral.
-  dummy = SYSCTL_RCGC2_R;
+  while ((SYSCTL_RCGC2_R & SYSCTL_RCGC2_GPIOF) == 0); // wait until pin is high
 
   GPIO_PORTF_DIR_R |= RED_MASK | YELLOW_MASK | GREEN_MASK;
   GPIO_PORTF_DEN_R |= RED_MASK | YELLOW_MASK | GREEN_MASK;

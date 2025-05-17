@@ -40,7 +40,7 @@ BaseType_t set_destination_floor(INT8U *destination_floor)
 * Function: sets destination floor in shared memory
 ******************************************************************/
 {
-    return xQueueOverwrite(destination_floor_q, &destination_floor);
+    return xQueueOverwrite(destination_floor_q, destination_floor);
 }
 
 
@@ -156,7 +156,8 @@ void elevator_task(void *pvParameters)
                     destination_floor = (destination_floor-1);              //needed to be split in two lines, something up with overflow
                     destination_floor = destination_floor % TOP_FLOOR;      // decrement within floor loc's
                 }
-                set_destination_floor(floor_loc2name(destination_floor));   // send to LCD
+                INT8U temp = floor_loc2name(destination_floor);
+                set_destination_floor(&temp);   // send to LCD
             }
 
             // update previous value

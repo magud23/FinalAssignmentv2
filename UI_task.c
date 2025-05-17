@@ -53,10 +53,11 @@ void UI_task(void *pvParameters)
     INT8U ui_mode = UI_IDLE;
     BOOLEAN first_time = TRUE;
     INT8U password_len = RESET;
-	INT8U previous_floor = RESET;
+    INT8U previous_floor = RESET;
     INT8U dest_floor = RESET;
     INT8U current_floor = RESET;
-    
+
+
     while(1)
     {
         vTaskDelay(100 / portTICK_RATE_MS); // wait 20 ms.
@@ -153,7 +154,7 @@ void UI_task(void *pvParameters)
 
             get_typed_pass_length(&password_len);
 
-            int i;
+			int i;
             for (i=0; i<PASS_LENGTH; i++)
             {
                 if(i < password_len)
