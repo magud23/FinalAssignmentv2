@@ -1,55 +1,6 @@
-/*****************************************************************************
- * University of Southern Denmark
- * Embedded C Programming (ECP)
- *
- * MODULENAME.: leds.c
- *
- * PROJECT....: ECP
- *
- * DESCRIPTION: See module specification file (.h-file).
- *
- * Change Log:
- ******************************************************************************
- * Date    Id    Change
- * YYMMDD
- * --------------------
- * 050128  KA    Module created.
- *
- *****************************************************************************/
-
-/***************************** Include files *******************************/
-#include <stdint.h>
-#include "tm4c123gh6pm.h"
-#include "emp_type.h"
-
-#include "FreeRTOS.h"
-#include "adcRTOS.h"
-#include "Task.h"
-#include "queue.h"
-#include "semphr.h"
+/****************************     Header     ******************************/
 #include "UI_task.h"
-#include "encoder.h"
-#include "lcd.h"
-#include "elevator.h"
-#include "password.h"
-#include "glob_def.h"
 
-
-/*****************************    Defines    *******************************/
-#define PF0     0       // Bit 0
-#define setup_state   0
-#define scale_state   1
-#define offset_state  2
-/*****************************   Constants   *******************************/
-
-/*INT16U min_in 0;
-INT16U max_in 4095;
-INT16U min_out 100;
-INT16U max_out 1000; */
-
-/*****************************   Variables   *******************************/
-QueueHandle_t ui_mode_q;
-extern QueueHandle_t encoder_pos_q, xQueue_lcd, destination_floor_q, password_q;
 /*****************************   Functions   *******************************/
 
 BaseType_t get_ui_mode(INT8U *pv_ui_mode)

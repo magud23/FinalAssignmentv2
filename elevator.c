@@ -1,51 +1,7 @@
 /*************************** Header ******************************/
-/*************************** Include files ***********************/
-#include <stdint.h>
-#include "tm4c123gh6pm.h"
-#include "emp_type.h"
-#include "lcd.h"
-#include "glob_def.h"
-#include "FreeRTOS.h"
-#include "queue.h"
-#include "semphr.h"
-#include "button.h"
-#include "leds.h"
-#include "password.h"
-#include "UI_task.h"
-#include "adcRTOS.h"
+#include "elevator.h"
 
-/*************************** Defines *****************************/
-//Task execution period (delay)
-#define ELEVATOR_TASK_PERIOD_MS 50
-
-//Timing
-#define ACCEL_TIME_PER_FLOOR_MS 500
-#define DOORS_STAY_OPEN_FOR_MS  3000
-
-//STATES
-#define FLOOR2_S 0
-#define WAIT_FOR_PASS_S 1
-#define SELECT_FLOOR_S 2
-#define ACCELERATE_S 3
-#define DECELERATE_S 4
-#define DOORS_OPEN_S 5
-#define DOORS_CLOSED_S 6
-#define BROKEN1_S 7
-#define BROKEN2_S 8
-
-//Utility
-#define FULL_REVOLUTION 15
-#define INVALID_FLOOR 99
-#define REMOVED_FLOOR 13
-#define TOP_FLOOR 20
-#define USES_PER_BREAK 4
-
-/*************************** Constants ***************************/
-/*************************** Variables ***************************/
-QueueHandle_t destination_floor_q;
-QueueHandle_t current_floor_q;
-
-/*************************** Function ****************************/
+/*************************** Functions ***************************/
 
 BaseType_t get_current_floor(INT8U * p_current_floor)
 /*****************************************************************
@@ -95,7 +51,7 @@ INT8U floor_name2loc(INT8U name)
     return location;
 }
 
-INT8U floor_loc2name(INT8U location) //TODO: move to UI task
+INT8U floor_loc2name(INT8U location)
 /*****************************************************************
  * Input: location of floor
  * Output: name of floor
