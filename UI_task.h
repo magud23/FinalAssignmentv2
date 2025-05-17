@@ -17,14 +17,15 @@
 #define UI_FLOOR_SELECT    4
 #define UI_PASSWORD        5
 
+
 void UI_task(void *pvParameters);
 
-void set_ui_mode(INT8U led_mode);
+BaseType_t set_ui_mode(INT8U ui_mode);
 /*****************************************************************************
-*   Input    :  INT8U representing led mode
-*   Output   :  -
-*   Function :  Put a ui_mode into buffer for ui_task
-*****************************************************************************/
+ *   Input    :  Pointer to variable in which to put ui mode from buffer
+ *   Output   :  Success of operation?
+ *   Function :  Put a ui_mode into buffer for ui_task
+ *****************************************************************************/
 
 
 #endif /* UI_TASK_H_ */

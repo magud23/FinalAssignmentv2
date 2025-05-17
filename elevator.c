@@ -39,6 +39,7 @@
 #define INVALID_FLOOR 99
 #define REMOVED_FLOOR 13
 #define TOP_FLOOR 20
+#define USES_PER_BREAK 4
 
 /*************************** Constants ***************************/
 /*************************** Variables ***************************/
@@ -51,9 +52,9 @@ QueueHandle_t current_floor_q;
 
 /*************************** Function ****************************/
 
-INT8U get_current_floor(INT8U * p_current_floor)
+BaseType_t get_current_floor(INT8U * p_current_floor)
 /*****************************************************************
-* Input: pointer to variable in which to put return from queue
+* Input: pointer in which to put the value returned from shared memory
 * Output: success/fail of operation
 * Function: gets current floor from shared memory
 ******************************************************************/
@@ -61,14 +62,14 @@ INT8U get_current_floor(INT8U * p_current_floor)
     return xQueuePeek(current_floor_q, p_current_floor,0);
 }
 
-void set_current_floor(INT8U current_floor)
+BaseType_t set_current_floor(INT8U current_floor)
 /*****************************************************************
-* Input:  variable which to put to queue
+* Input:  variable which to put to shared memory (OBS: not pointer)
 * Output: success/fail of operation
 * Function: sets current floor in shared memory
 ******************************************************************/
 {
-    xQueueOverwrite(current_floor_q, &current_floor);
+    return xQueueOverwrite(current_floor_q, &current_floor);
 }
 
 void set_destination_floor(INT8U destination_floor)
@@ -139,17 +140,15 @@ extern void elevator_task(void *pvParameters)
     BOOLEAN encoder_push = RESET;
     INT16S encoder_val, prev_encoder_val, dest_encoder_val;
     BOOLEAN first_journey = TRUE;
-    BOOLEAN encoder_dir_is_clockwise = TRUE;
+    BOOLEAN encoder_dir_is_up = TRUE;
 
 
     TickType_t xLastWakeTime = xTaskGetTickCount();
-
     while(1)
     {
-
-        set_current_floor(floor_loc2name(current_floor)); //update shared memory
-
+        set_current_floor(floor_loc2name(current_floor));       //update shared memory
         vTaskDelayUntil(&xLastWakeTime, ELEVATOR_TASK_PERIOD_MS / portTICK_RATE_MS);
+
         /*------STATE MACHINE ------*/
         switch(state)
         {
@@ -157,7 +156,7 @@ extern void elevator_task(void *pvParameters)
             if(get_button_event() == BE_LONG_PUSH)
             {
                 travel_dist = (INT8S)destination_floor - (INT8S)current_floor;
-                use_counter = (use_counter + 1) % 4;
+                use_counter = (use_counter + 1) % USES_PER_BREAK;
                 set_led_mode(LED_ACCELERATE);
                 set_ui_mode(UI_CURRENT_FLOOR);
                 state = ACCELERATE_S;
@@ -172,15 +171,13 @@ extern void elevator_task(void *pvParameters)
                 xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
                 prev_encoder_val = encoder_val;
             }
-
             break;
 
         case SELECT_FLOOR_S:
-
             xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
             xQueueReceive(encoder_push_q, &encoder_push, portMAX_DELAY);
 
-            if(encoder_push) // select the floor
+            if(encoder_push)                                                // select the floor
             {
                 travel_dist = (INT8S)destination_floor - (INT8S)current_floor;
                 set_led_mode(LED_ACCELERATE);
@@ -189,17 +186,16 @@ extern void elevator_task(void *pvParameters)
             }
             else // update selection
             {
-                // check direction of change
-                if(encoder_val > prev_encoder_val) // up
-                {
-                    destination_floor = (destination_floor+1) % TOP_FLOOR; // increment within floor loc's
+                if(encoder_val > prev_encoder_val)                          // check direction of change
+                {                                                           // up
+                    destination_floor = (destination_floor+1) % TOP_FLOOR;  // increment within floor loc's
                 }
-                else if(encoder_val < prev_encoder_val) // down
-                {
-                    destination_floor = (destination_floor-1); //needed to be split in two lines, something up with overflow
-                    destination_floor = destination_floor % TOP_FLOOR; // decrement within floor loc's
+                else if(encoder_val < prev_encoder_val)
+                {                                                           // down
+                    destination_floor = (destination_floor-1);              //needed to be split in two lines, something up with overflow
+                    destination_floor = destination_floor % TOP_FLOOR;      // decrement within floor loc's
                 }
-                set_destination_floor(floor_loc2name(destination_floor));// send to LCD
+                set_destination_floor(floor_loc2name(destination_floor));   // send to LCD
             }
 
             // update previous value
@@ -208,7 +204,7 @@ extern void elevator_task(void *pvParameters)
 
         case ACCELERATE_S:
         {
-            if(elevator_timer++ ==  ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS)
+            if(elevator_timer++ ==  ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS) // Time has passed and a new floor is reached
             {
                 elevator_timer = RESET;
                 if(current_floor < destination_floor - travel_dist/2)
@@ -227,8 +223,9 @@ extern void elevator_task(void *pvParameters)
             }
         }
         break;
+
         case DECELERATE_S:
-            if(elevator_timer++ ==  ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS ) // correct time has passed based on travelling dist
+            if(elevator_timer++ ==  ACCEL_TIME_PER_FLOOR_MS/ELEVATOR_TASK_PERIOD_MS ) // Time has passed and a new floor is reached
             {
                 elevator_timer = RESET;
                 if(current_floor < destination_floor)
@@ -248,8 +245,7 @@ extern void elevator_task(void *pvParameters)
             break;
 
         case DOORS_OPEN_S:
-
-            if(first_journey)   // first time on doors open
+            if(first_journey)   // first time on doors open stay open and go to password
             {
                 first_journey = FALSE;
                 set_ui_mode(UI_PASSWORD);
@@ -259,7 +255,7 @@ extern void elevator_task(void *pvParameters)
             {
                 set_ui_mode(UI_CURRENT_FLOOR);
                 set_led_mode(LED_IDLE);
-                elevator_timer = 0;
+                elevator_timer = RESET;
                 state = DOORS_CLOSED_S;
             }
             break;
@@ -269,14 +265,14 @@ extern void elevator_task(void *pvParameters)
             {
                 if(use_counter == 0) //breaks on 4th use
                 {
-                    use_counter = (use_counter + 1) % 4;
+                    use_counter = (use_counter + 1) % USES_PER_BREAK;
                     set_led_mode(LED_BROKEN);
                     set_ui_mode(UI_POT_GOAL);
                     state = BROKEN1_S;
                 }
                 else
                 {
-                    use_counter = (use_counter + 1) % 4;
+                    use_counter = (use_counter + 1) % USES_PER_BREAK;
                     set_led_mode(LED_OPEN);
                     set_ui_mode(UI_PASSWORD);
                     state = WAIT_FOR_PASS_S;
@@ -285,15 +281,11 @@ extern void elevator_task(void *pvParameters)
             break;
 
         case BROKEN1_S:
-            if(get_adc() == current_floor_to_randomlike_reference(floor_loc2name(current_floor))) //POT is MATCH
+            if(get_adc() == current_floor_to_randomlike_reference(floor_loc2name(current_floor))) //POT is a MATCH
             {
-                set_led_mode(LED_OPEN); //stop blinking
-                encoder_dir_is_clockwise = !encoder_dir_is_clockwise;
-
-                // update destination encoder value
+                encoder_dir_is_up = !encoder_dir_is_up;                         //Flip direction each time
                 xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
-
-                if(encoder_dir_is_clockwise)
+                if(encoder_dir_is_up)                                           // update destination encoder value (dependent on desired direction)
                 {
                     dest_encoder_val = encoder_val + FULL_REVOLUTION;
                 }
@@ -301,39 +293,33 @@ extern void elevator_task(void *pvParameters)
                 {
                     dest_encoder_val = encoder_val - FULL_REVOLUTION;
                 }
-
-                set_ui_mode(UI_IDLE);
+                set_led_mode(LED_OPEN);                                         //Stop blinking
+                set_ui_mode(UI_IDLE);                                           //Clear screen
                 state = BROKEN2_S;
             }
-
             break;
 
         case BROKEN2_S:
-            xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);
-            xQueueReceive(encoder_push_q, &encoder_push, portMAX_DELAY);
-
-            if(encoder_push && ( ((encoder_val >= dest_encoder_val) && encoder_dir_is_clockwise) || ((encoder_val <= dest_encoder_val) && !encoder_dir_is_clockwise) )) // encoder has reached destination and is pushed
+            xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);      //Get newest encoder pos
+            xQueueReceive(encoder_push_q, &encoder_push, portMAX_DELAY);    //Get newest encoder push
+            if(encoder_push && ( ((encoder_val >= dest_encoder_val) && encoder_dir_is_up) || ((encoder_val <= dest_encoder_val) && !encoder_dir_is_up) )) // encoder has reached destination and is pushed
             {
                 state = WAIT_FOR_PASS_S;
                 set_ui_mode(UI_PASSWORD);
             }
             else // update selection
             {
-                // check direction of change
-                if(((encoder_val < prev_encoder_val) && encoder_dir_is_clockwise) || ((encoder_val > prev_encoder_val) && !encoder_dir_is_clockwise)) // up
+                // check direction of change "if (change is downwards and supposed to be up) OR (change is up but should be NOTup)"
+                if(((encoder_val < prev_encoder_val) && encoder_dir_is_up) || ((encoder_val > prev_encoder_val) && !encoder_dir_is_up)) // up
                 {
                     set_ui_mode(UI_ENC_ERROR);
                 }
-                else if(encoder_val != prev_encoder_val)
+                else if(encoder_val != prev_encoder_val) //If there is a change (and it is correct)
                 {
                     set_ui_mode(UI_IDLE);
                 }
-
             }
-
-            // update previous value
-            prev_encoder_val = encoder_val;
-
+            prev_encoder_val = encoder_val;          // update previous value
             break;
         }
     }

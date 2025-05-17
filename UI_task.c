@@ -39,9 +39,6 @@
 #define setup_state   0
 #define scale_state   1
 #define offset_state  2
-
-
-
 /*****************************   Constants   *******************************/
 
 /*INT16U min_in 0;
@@ -54,21 +51,24 @@ QueueHandle_t ui_mode_q;
 extern QueueHandle_t encoder_pos_q, xQueue_lcd, destination_floor_q, password_q;
 /*****************************   Functions   *******************************/
 
-
-void set_ui_mode(INT8U led_mode)
+BaseType_t get_ui_mode(INT8U *pv_ui_mode)
 /*****************************************************************************
- *   Input    :  INT8U representing led mode
- *   Output   :  -
+ *   Input    :  Pointer to variable in which to put ui mode from buffer
+ *   Output   :  Success of operation?
  *   Function :  Put a ui_mode into buffer for ui_task
  *****************************************************************************/
 {
-    xQueueOverwrite(ui_mode_q, &led_mode);
+    return xQueueReceive(ui_mode_q, pv_ui_mode, 0);
 }
 
-
-void LCD_print_char(INT8U ch)
+BaseType_t set_ui_mode(INT8U led_mode)
+/*****************************************************************************
+ *   Input    :  Pointer to variable that is put into buffer
+ *   Output   :  Success of operation?
+ *   Function :  Put a ui_mode into buffer for ui_task
+ *****************************************************************************/
 {
-    xQueueSend( xQueue_lcd, &ch, portMAX_DELAY);
+    return xQueueOverwrite(ui_mode_q, &led_mode);
 }
 
 
@@ -77,117 +77,21 @@ char change_int_to_char1(INT8U number)
     return '0' + number;
 }
 
-
-void encoder_mode()
-{
-    INT16S encoder_value;
-    char input;
-
-
-    xQueueReceive(encoder_pos_q, &encoder_value, portMAX_DELAY);
-    int cv_mod0 = encoder_value % 10;
-    int cv_mod10 = encoder_value/10 % 10;
-    int cv_mod100 = encoder_value/100 % 10;
-    int cv_mod1000 = encoder_value/1000 % 10;
-    input = change_int_to_char1(cv_mod1000);
-    xQueueSend( xQueue_lcd, &input, portMAX_DELAY);
-    input = change_int_to_char1(cv_mod100);
-    xQueueSend( xQueue_lcd, &input, portMAX_DELAY);
-    input = change_int_to_char1(cv_mod10);
-    xQueueSend( xQueue_lcd, &input, portMAX_DELAY);
-    input = change_int_to_char1(cv_mod0);
-    xQueueSend( xQueue_lcd, &input, portMAX_DELAY);
-    home_LCD();
-}
-
-
-
-void current_floor_mode()
-{
-
-    LCD_print_char(0xff); //clear and home display
-
-    LCD_print_char('C');
-    LCD_print_char('U');
-    LCD_print_char('R');
-    LCD_print_char('R');
-    LCD_print_char('E');
-    LCD_print_char('N');
-    LCD_print_char('T');
-    LCD_print_char(' ');
-    LCD_print_char('F');
-    LCD_print_char('L');
-    LCD_print_char('O');
-    LCD_print_char('O');
-    LCD_print_char('R');
-    LCD_print_char(':');
-}
-
-
-void floor_select_mode()
-{
-
-    LCD_print_char(0xff); //clear and home display
-
-    LCD_print_char('S');
-    LCD_print_char('E');
-    LCD_print_char('L');
-    LCD_print_char('E');
-    LCD_print_char('C');
-    LCD_print_char('T');
-    LCD_print_char(' ');
-    LCD_print_char('F');
-    LCD_print_char('L');
-    LCD_print_char('O');
-    LCD_print_char('O');
-    LCD_print_char('R');
-    LCD_print_char(':');
-}
-
-void password_mode()
-{
-
-    LCD_print_char(0xff); //clear and home display
-    LCD_print_char('T');
-    LCD_print_char('Y');
-    LCD_print_char('P');
-    LCD_print_char('E');
-    LCD_print_char(' ');
-    LCD_print_char('P');
-    LCD_print_char('I');
-    LCD_print_char('N');
-    LCD_print_char(' ');
-    LCD_print_char('T');
-    LCD_print_char('H');
-    LCD_print_char('E');
-    LCD_print_char('N');
-    LCD_print_char(' ');
-    LCD_print_char('#');
-
-}
-
 pot_goal_mode()
 {
     INT8U current_floor = 0 ;
     get_current_floor(&current_floor);
     INT16U target_val = current_floor_to_randomlike_reference(current_floor);
 
-    LCD_print_char(0xff);
-    LCD_print_char(change_int_to_char1((target_val/1000) % 10));
-    LCD_print_char(change_int_to_char1((target_val/100) % 10));
-    LCD_print_char(change_int_to_char1((target_val/10) % 10));
-    LCD_print_char(change_int_to_char1(target_val % 10));
-}
+    wr_ch_LCD(0xff);
+    wr_str_LCD("REACH THIS: ");
+    move_LCD(12,0);
+    wr_ch_LCD(change_int_to_char1((target_val/1000) % 10));
+    wr_ch_LCD(change_int_to_char1((target_val/100) % 10));
+    wr_ch_LCD(change_int_to_char1((target_val/10) % 10));
+    wr_ch_LCD(change_int_to_char1(target_val % 10));
 
-enc_error_mode()
-{
-    LCD_print_char(0xff);
-    LCD_print_char('W');
-    LCD_print_char('R');
-    LCD_print_char('O');
-    LCD_print_char('N');
-    LCD_print_char('G');
-    LCD_print_char('!');
+    wr_str_LCD("ADJUST: ");
 }
 
 
@@ -202,7 +106,7 @@ void UI_task(void *pvParameters)
         vTaskDelay(100 / portTICK_RATE_MS); // wait 20 ms.
 
         //set first time for static text
-        if (xQueueReceive(ui_mode_q, &ui_mode, 0) == pdTRUE)
+        if (get_ui_mode(&ui_mode) == pdTRUE)
         {
             first_time = 1;
         }
@@ -210,16 +114,16 @@ void UI_task(void *pvParameters)
         switch(ui_mode)
         {
         case UI_IDLE:
-            LCD_print_char(0xff);
+            wr_ch_LCD(0xff);
             break;
 
         case UI_CURRENT_FLOOR:
             if(first_time)
             {
-                current_floor_mode();
+                wr_ch_LCD(0xff); //clear and home display
+                wr_str_LCD("CURRENT FLOOR:");
                 first_time = 0;
             }
-
             // update number on second line
             move_LCD(0,1);
 
@@ -231,8 +135,8 @@ void UI_task(void *pvParameters)
             if(previous_floor != current_floor)
             {
                 previous_floor = current_floor;
-                LCD_print_char(change_int_to_char1(current_floor/10 % 10));
-                LCD_print_char(change_int_to_char1(current_floor % 10));
+                wr_ch_LCD(change_int_to_char1(current_floor/10 % 10));
+                wr_ch_LCD(change_int_to_char1(current_floor % 10));
             }
 
             break;
@@ -243,25 +147,25 @@ void UI_task(void *pvParameters)
                 pot_goal_mode();
                 first_time = 0;
             }
-
             // update number on second line
             INT16U adc_val = get_adc();
-            move_LCD(0,1);
-            LCD_print_char(change_int_to_char1((adc_val/1000) % 10));
-            LCD_print_char(change_int_to_char1((adc_val/100) % 10));
-            LCD_print_char(change_int_to_char1((adc_val/10) % 10));
-            LCD_print_char(change_int_to_char1(adc_val % 10));
-
+            move_LCD(12,1);
+            wr_ch_LCD(change_int_to_char1((adc_val/1000) % 10));
+            wr_ch_LCD(change_int_to_char1((adc_val/100) % 10));
+            wr_ch_LCD(change_int_to_char1((adc_val/10) % 10));
+            wr_ch_LCD(change_int_to_char1(adc_val % 10));
             break;
 
         case UI_ENC_ERROR :
-            enc_error_mode();
+            wr_ch_LCD(0xff);
+            wr_str_LCD("WRONG!");
             break;
 
         case UI_FLOOR_SELECT:
             if(first_time)
             {
-                floor_select_mode();
+                wr_ch_LCD(0xff); //clear and home display
+                wr_str_LCD("SELECT FLOOR:");
                 first_time = 0;
             }
 
@@ -269,15 +173,15 @@ void UI_task(void *pvParameters)
             move_LCD(0,1);
             INT8U dest_floor = 0;
             xQueuePeek(destination_floor_q, &dest_floor, portMAX_DELAY);
-            LCD_print_char(change_int_to_char1(dest_floor/10 % 10));
-            LCD_print_char(change_int_to_char1(dest_floor % 10));
-
+            wr_ch_LCD(change_int_to_char1(dest_floor/10 % 10));
+            wr_ch_LCD(change_int_to_char1(dest_floor % 10));
             break;
 
         case UI_PASSWORD:
             if(first_time)
             {
-                password_mode();
+                wr_ch_LCD(0xff); //clear and home display
+                wr_str_LCD("TYPE PIN THEN #");
                 first_time = 0;
             }
 
@@ -291,14 +195,13 @@ void UI_task(void *pvParameters)
             {
                 if(i < password_len)
                 {
-                    LCD_print_char('*');
+                    wr_ch_LCD('*');
                 }
                 else
                 {
-                    LCD_print_char('-');
+                    wr_ch_LCD('-');
                 }
             }
-
             break;
         }
     }
