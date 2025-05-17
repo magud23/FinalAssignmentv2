@@ -7,7 +7,7 @@ BaseType_t get_current_floor(INT8U * p_current_floor)
 /*****************************************************************
 * Input: pointer in which to put the value returned from shared memory
 * Output: success/fail of operation
-* Function: gets current floor from shared memory
+* Function: gets current floor from buffer
 ******************************************************************/
 {
     return xQueuePeek(current_floor_q, p_current_floor,0);
@@ -17,7 +17,7 @@ BaseType_t set_current_floor(INT8U current_floor)
 /*****************************************************************
 * Input:  variable which to put to shared memory (OBS: not pointer)
 * Output: success/fail of operation
-* Function: sets current floor in shared memory
+* Function: sets current floor in buffer
 ******************************************************************/
 {
     return xQueueOverwrite(current_floor_q, &current_floor);
@@ -28,7 +28,7 @@ BaseType_t get_destination_floor(INT8U * p_destination_floor)
 /*****************************************************************
 * Input: pointer in which to put the value returned from shared memory
 * Output: success/fail of operation
-* Function: gets dest floor from shared memory
+* Function: gets dest floor from buffer
 ******************************************************************/
 {
     return xQueuePeek(destination_floor_q, p_destination_floor,0);
@@ -37,7 +37,7 @@ BaseType_t set_destination_floor(INT8U *destination_floor)
 /*****************************************************************
 * Input: pointer to variable
 * Output: success/fail of operation
-* Function: sets destination floor in shared memory
+* Function: sets destination floor in buffer
 ******************************************************************/
 {
     return xQueueOverwrite(destination_floor_q, destination_floor);
