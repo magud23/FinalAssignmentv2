@@ -1,46 +1,46 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded Programming (EMP)
-*
-* MODULENAME.: keyRTOS.c
-*
-* PROJECT....: EMP
-*
-* DESCRIPTION: See module specification file (.h-file).
-*
-* Change Log:
-*****************************************************************************
-* Date    Id    Change
-* YYMMDD
-* --------------------
-* 150321  MoH   Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ * Embedded Programming (EMP)
+ *
+ * MODULENAME.: keyRTOS.c
+ *
+ * PROJECT....: EMP
+ *
+ * DESCRIPTION: See module specification file (.h-file).
+ *
+ * Change Log:
+ *****************************************************************************
+ * Date    Id    Change
+ * YYMMDD
+ * --------------------
+ * 150321  MoH   Module created.
+ *
+ *****************************************************************************/
 #include "keyRTOS.h"
 /*****************************   Functions   *******************************/
 
 INT8U row( INT8U y )
 {
-  INT8U result = 0;
+    INT8U result = 0;
 
-  switch( y )
-  {
+    switch( y )
+    {
     case R1: result = 1; break;
     case R2: result = 2; break;
     case R3: result = 3; break;
     case R4: result = 4; break;
-  }
-  return( result );
+    }
+    return( result );
 }
 
 INT8U key_catch( x, y )
 INT8U x, y;
 {
-  const INT8U matrix[3][4] = {{'*','7','4','1'},
-                              {'0','8','5','2'},
-                              {'#','9','6','3'}};
+    const INT8U matrix[3][4] = {{'*','7','4','1'},
+                                {'0','8','5','2'},
+                                {'#','9','6','3'}};
 
-  return( matrix[x-1][y-1] );
+    return( matrix[x-1][y-1] );
 }
 
 
@@ -70,18 +70,18 @@ BOOLEAN check_column(INT8U x)
 
 extern void key_task(void *pvParameters)
 /*****************************************************************************
-*   Input    :
-*   Output   :
-*   Function :
-******************************************************************************/
+ *   Input    :
+ *   Output   :
+ *   Function :
+ ******************************************************************************/
 {
     INT8U my_state = IDLE_S;
 
     while(1)
     {
         switch(my_state)
-          {
-          case IDLE_S :
+        {
+        case IDLE_S :
             GPIO_PORTA_DATA_R &= ~(COL1|COL2|COL3);     // Clear the 3 bits for the columns 0XE3
             GPIO_PORTA_DATA_R |= COL1;                  // Set the bit for column 1
             if (check_column(1))                        // Check all the rows for column 1, using the function check_column
@@ -104,14 +104,14 @@ extern void key_task(void *pvParameters)
                 break;
             }
             break;
-          case HOLDING_S:
+        case HOLDING_S:
             if( !(GPIO_PORTE_DATA_R & LSB4) )   // We stay here until the button is released so a button press is not counted more than once
             {
                 vTaskDelay( 10 / portTICK_RATE_MS); // wait 10 ms (5 ms is too little)
                 my_state = IDLE_S;
             }
             break;
-          }
+        }
     }
 
 }

@@ -154,7 +154,7 @@ void UI_task(void *pvParameters)
 
             get_typed_pass_length(&password_len);
 
-			int i;
+            int i;
             for (i=0; i<PASS_LENGTH; i++)
             {
                 if(i < password_len)

@@ -5,20 +5,20 @@
 
 BaseType_t get_current_floor(INT8U * p_current_floor)
 /*****************************************************************
-* Input: pointer in which to put the value returned from buffer
-* Output: success/fail of operation
-* Function: gets current floor from buffer
-******************************************************************/
+ * Input: pointer in which to put the value returned from buffer
+ * Output: success/fail of operation
+ * Function: gets current floor from buffer
+ ******************************************************************/
 {
     return xQueuePeek(current_floor_q, p_current_floor,0);
 }
 
 BaseType_t set_current_floor(INT8U * current_floor)
 /*****************************************************************
-* Input:  variable which to put to shared memory (OBS: not pointer)
-* Output: success/fail of operation
-* Function: sets current floor in buffer
-******************************************************************/
+ * Input:  variable which to put to shared memory (OBS: not pointer)
+ * Output: success/fail of operation
+ * Function: sets current floor in buffer
+ ******************************************************************/
 {
     INT8U temp = floor_loc2name( *current_floor);
     return xQueueOverwrite(current_floor_q, &temp);
@@ -27,21 +27,21 @@ BaseType_t set_current_floor(INT8U * current_floor)
 
 BaseType_t get_destination_floor(INT8U * p_destination_floor)
 /*****************************************************************
-* Input: pointer in which to put the value returned from shared memory
-* Output: success/fail of operation
-* Function: gets dest floor from buffer
-******************************************************************/
+ * Input: pointer in which to put the value returned from shared memory
+ * Output: success/fail of operation
+ * Function: gets dest floor from buffer
+ ******************************************************************/
 {
     return xQueuePeek(destination_floor_q, p_destination_floor,0);
 }
 BaseType_t set_destination_floor(INT8U *destination_floor)
 /*****************************************************************
-* Input: pointer to variable
-* Output: success/fail of operation
-* Function: sets destination floor in buffer
-******************************************************************/
+ * Input: pointer to variable
+ * Output: success/fail of operation
+ * Function: sets destination floor in buffer
+ ******************************************************************/
 {   INT8U temp = floor_loc2name(*destination_floor);
-    return xQueueOverwrite(destination_floor_q, &temp);
+return xQueueOverwrite(destination_floor_q, &temp);
 }
 
 
@@ -88,10 +88,10 @@ INT16U current_floor_to_randomlike_reference(INT8U current_floor)
 
 void elevator_task(void *pvParameters)
 /*****************************************************************
-* Input: -
-* Output: -
-* Function: The brains of the elevator (FSM)
-******************************************************************/
+ * Input: -
+ * Output: -
+ * Function: The brains of the elevator (FSM)
+ ******************************************************************/
 {
     INT8U state = FLOOR2_S;
     INT8U current_floor = floor_name2loc(2);

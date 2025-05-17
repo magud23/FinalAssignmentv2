@@ -1,24 +1,24 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded C Programming (ECP)
-*
-* MODULENAME.: status led.h
-*
-* PROJECT....: EMP
-*
-* DESCRIPTION: Test.
-*
-* Change Log:
-******************************************************************************
-* Date    Id    Change
-* YYMMDD
-* --------------------
-* 100408  KHA    Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ * Embedded C Programming (ECP)
+ *
+ * MODULENAME.: status led.h
+ *
+ * PROJECT....: EMP
+ *
+ * DESCRIPTION: Test.
+ *
+ * Change Log:
+ ******************************************************************************
+ * Date    Id    Change
+ * YYMMDD
+ * --------------------
+ * 100408  KHA    Module created.
+ *
+ *****************************************************************************/
 
 #ifndef _LEDS_H
-  #define _LEDS_H
+#define _LEDS_H
 
 /***************************** Include files *******************************/
 #include <stdint.h>
@@ -58,24 +58,24 @@ QueueHandle_t led_q;
 
 void set_led_mode(INT8U led_mode);
 /*****************************************************************************
-*   Input    :  INT8U representing led_mod
-*   Output   :  -
-*   Function :  Put a LED_mode into buffer for led_task
-*****************************************************************************/
+ *   Input    :  INT8U representing led_mod
+ *   Output   :  -
+ *   Function :  Put a LED_mode into buffer for led_task
+ *****************************************************************************/
 
 void leds_init(void);
 /*****************************************************************************
-*   Input    :  -
-*   Output   :  -
-*   Function :  Init LEDs
-*****************************************************************************/
+ *   Input    :  -
+ *   Output   :  -
+ *   Function :  Init LEDs
+ *****************************************************************************/
 
 void leds_task(void *pvParameters);
 /*****************************************************************************
-*   Input    :  -
-*   Output   :  -
-*   Function :  The task responsible for turning LEDS on or OFF
-*****************************************************************************/
+ *   Input    :  -
+ *   Output   :  -
+ *   Function :  The task responsible for turning LEDS on or OFF
+ *****************************************************************************/
 
 
 

@@ -60,10 +60,10 @@ BaseType_t set_ui_mode(INT8U ui_mode);
 
 void UI_task(void *pvParameters);
 /*****************************************************************
-* Input: -
-* Output: -
-* Function: The brains of the UI (FSM)
-******************************************************************/
+ * Input: -
+ * Output: -
+ * Function: The brains of the UI (FSM)
+ ******************************************************************/
 
 
 #endif /* UI_TASK_H_ */

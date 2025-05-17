@@ -1,21 +1,21 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded C Programming (ECP)
-*
-* MODULENAME.: button.h
-*
-* PROJECT....: ECP
-*
-* DESCRIPTION: Test.
-*
-* Change Log:
-******************************************************************************
-* Date    Id    Change
-* YYMMDD
-* --------------------
-* 090215  MoH   Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ * Embedded C Programming (ECP)
+ *
+ * MODULENAME.: button.h
+ *
+ * PROJECT....: ECP
+ *
+ * DESCRIPTION: Test.
+ *
+ * Change Log:
+ ******************************************************************************
+ * Date    Id    Change
+ * YYMMDD
+ * --------------------
+ * 090215  MoH   Module created.
+ *
+ *****************************************************************************/
 
 #ifndef BUTTON_H_
 #define BUTTON_H_
@@ -54,10 +54,10 @@ QueueHandle_t button_q;
 
 void button_task(void *pvParameters);
 /*****************************************************************************
-*   Input    : -
-*   Output   : Button Event
-*   Function : Test function
-******************************************************************************/
+ *   Input    : -
+ *   Output   : Button Event
+ *   Function : Test function
+ ******************************************************************************/
 
 INT8U get_button_event(void);
 
