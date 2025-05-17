@@ -99,6 +99,7 @@ void elevator_task(void *pvParameters)
     INT8U use_counter = RESET;
     INT16U elevator_timer = RESET;
     BOOLEAN encoder_push = RESET;
+    INT16U adc_val= RESET;
     INT16S encoder_val, prev_encoder_val, dest_encoder_val;
     BOOLEAN first_journey = TRUE;
     BOOLEAN encoder_dir_is_up = TRUE;
@@ -244,7 +245,8 @@ void elevator_task(void *pvParameters)
             break;
 
         case BROKEN1_S:
-            if(get_adc() == current_floor_to_randomlike_reference(floor_loc2name(current_floor))) //POT is a MATCH
+            get_pot(&adc_val);
+            if(adc_val == current_floor_to_randomlike_reference(floor_loc2name(current_floor))) //POT is a MATCH
             {
                 encoder_dir_is_up = !encoder_dir_is_up;                         //Flip direction each time
                 get_encoder_pos(&encoder_val);

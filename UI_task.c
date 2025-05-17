@@ -101,7 +101,8 @@ void UI_task(void *pvParameters)
                 first_time = FALSE;
             }
             // update number on second line
-            INT16U adc_val = get_adc();
+            INT16U adc_val = RESET;
+            get_pot(&adc_val);
             move_LCD(12,1);
             wr_ch_LCD(change_int_to_char1((adc_val/1000) % 10));
             wr_ch_LCD(change_int_to_char1((adc_val/100) % 10));

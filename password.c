@@ -16,7 +16,7 @@ BaseType_t get_typed_pass_length(INT8U * ptr_len)
 
 
 
-extern void password_task(void *pvParameters)
+void password_task(void *pvParameters)
 /*****************************************************************************
  *   Input    :
  *   Output   :
