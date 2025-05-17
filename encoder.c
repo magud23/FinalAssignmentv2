@@ -28,7 +28,7 @@ BaseType_t get_encoder_pos(INT16S * p_val)
 * Function: gets position of encoder from shared memory
 ******************************************************************/
 {
-    return xQueuePeek(encoder_pos_q, p_val,0);
+    return xQueueReceive(encoder_pos_q, p_val,0);
 }
 
 BaseType_t get_encoder_push(INT8U * p_val)
