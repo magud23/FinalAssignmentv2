@@ -263,16 +263,15 @@ extern void elevator_task(void *pvParameters)
         case DOORS_CLOSED_S:
             if(get_button_event() == BE_LONG_PUSH) //wait for sw1 long press
             {
+                use_counter = (use_counter + 1) % USES_PER_BREAK;
                 if(use_counter == 0) //breaks on 4th use
                 {
-                    use_counter = (use_counter + 1) % USES_PER_BREAK;
                     set_led_mode(LED_BROKEN);
                     set_ui_mode(UI_POT_GOAL);
                     state = BROKEN1_S;
                 }
                 else
                 {
-                    use_counter = (use_counter + 1) % USES_PER_BREAK;
                     set_led_mode(LED_OPEN);
                     set_ui_mode(UI_PASSWORD);
                     state = WAIT_FOR_PASS_S;
@@ -294,7 +293,7 @@ extern void elevator_task(void *pvParameters)
                     dest_encoder_val = encoder_val - FULL_REVOLUTION;
                 }
                 set_led_mode(LED_OPEN);                                         //Stop blinking
-                set_ui_mode(UI_IDLE);                                           //Clear screen
+                set_ui_mode(UI_ENC);                                            //Update screen
                 state = BROKEN2_S;
             }
             break;
@@ -302,6 +301,7 @@ extern void elevator_task(void *pvParameters)
         case BROKEN2_S:
             xQueueReceive(encoder_pos_q, &encoder_val, portMAX_DELAY);      //Get newest encoder pos
             xQueueReceive(encoder_push_q, &encoder_push, portMAX_DELAY);    //Get newest encoder push
+
             if(encoder_push && ( ((encoder_val >= dest_encoder_val) && encoder_dir_is_up) || ((encoder_val <= dest_encoder_val) && !encoder_dir_is_up) )) // encoder has reached destination and is pushed
             {
                 state = WAIT_FOR_PASS_S;
@@ -316,7 +316,7 @@ extern void elevator_task(void *pvParameters)
                 }
                 else if(encoder_val != prev_encoder_val) //If there is a change (and it is correct)
                 {
-                    set_ui_mode(UI_IDLE);
+                    set_ui_mode(UI_ENC);
                 }
             }
             prev_encoder_val = encoder_val;          // update previous value
