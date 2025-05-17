@@ -12,7 +12,7 @@
 #include "button.h"
 #include "password.h"
 /*************************** Defines *****************************/
-#define LENGTH 4
+#define PASS_LENGTH 4
 #define DIVISOR 8
 #define RESET 0
 
@@ -52,11 +52,11 @@ extern void password_task(void *pvParameters)
             {
                 password = RESET;
                 length = RESET;
-                xQueueOverwrite(password_q, &password);
+                xQueueOverwrite(password_q, &length);
             }
             else if(keypress == '#')
             {
-                if(password % DIVISOR == 0 && password != 0 && length == LENGTH)
+                if(password % DIVISOR == 0 && password != 0 && length == PASS_LENGTH)
                 {
                     // send confirmation to elevator
                     status = PASS_ACCEPTED;
@@ -64,14 +64,14 @@ extern void password_task(void *pvParameters)
                 }
                 password = RESET;
                 length = RESET;
-                xQueueOverwrite(password_q, &password);
+                xQueueOverwrite(password_q, &length);
             }
             else
             {
                 password = password*(INT16U)10; // move decimal left
                 password += (INT16U)keypress - '0';
                 length++;
-                xQueueOverwrite(password_q, &password);
+                xQueueOverwrite(password_q, &length);
             }
         }
     }

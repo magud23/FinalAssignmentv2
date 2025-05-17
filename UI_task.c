@@ -31,6 +31,7 @@
 #include "encoder.h"
 #include "lcd.h"
 #include "elevator.h"
+#include "password.h"
 
 
 /*****************************    Defines    *******************************/
@@ -283,12 +284,21 @@ void UI_task(void *pvParameters)
             // update number on second line
             move_LCD(0,1);
 
-            INT8U password = 0;
-            xQueuePeek(password_q, &password, portMAX_DELAY);
-            LCD_print_char(change_int_to_char1((password /1000) % 10));
-            LCD_print_char(change_int_to_char1((password /100) % 10));
-            LCD_print_char(change_int_to_char1((password /10) % 10));
-            LCD_print_char(change_int_to_char1(password % 10));
+            INT8U password_len = 0;
+            xQueuePeek(password_q, &password_len, portMAX_DELAY);
+            int i;
+            for (i=0; i<PASS_LENGTH; i++)
+            {
+                if(i < password_len)
+                {
+                    LCD_print_char('*');
+                }
+                else
+                {
+                    LCD_print_char('-');
+                }
+            }
+
             break;
         }
     }

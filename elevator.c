@@ -40,9 +40,7 @@
 #define REMOVED_FLOOR 13
 #define TOP_FLOOR 20
 
-
 /*************************** Constants ***************************/
-
 /*************************** Variables ***************************/
 extern QueueHandle_t xQueue_lcd;
 extern QueueHandle_t encoder_pos_q;
@@ -50,7 +48,6 @@ extern QueueHandle_t encoder_push_q;
 
 QueueHandle_t destination_floor_q;
 QueueHandle_t current_floor_q;
-
 
 /*************************** Function ****************************/
 

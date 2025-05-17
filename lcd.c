@@ -120,9 +120,13 @@ void wr_ctrl_LCD_low( INT8U Ch )
 
   temp = GPIO_PORTC_DATA_R;
   temp  = ((Ch & LSB4) << 4); // set any LSB4 as MSB4 not already set
+  for( i=0; i<1000; i++ );
   GPIO_PORTC_DATA_R  = temp & MSB4;        //put data on LCD D7-4
+  for( i=0; i<1000; i++ );
   GPIO_PORTD_DATA_R &= ~LCD_RS;     // Select Control mode (write to instruction register)
+  for( i=0; i<1000; i++ );
   GPIO_PORTD_DATA_R |= LCD_E;		// Set E High LCD_E (Starts data read/write.)
+  for( i=0; i<1000; i++ );
   GPIO_PORTD_DATA_R &= ~LCD_E;		// Set E Low
 
 }
@@ -146,12 +150,16 @@ void out_LCD_low( INT8U Ch )
 ******************************************************************************/
 {
   INT8U temp;
+  volatile int i;
 	  
   temp = GPIO_PORTC_DATA_R & LSB4;
   GPIO_PORTC_DATA_R  = temp | ((Ch & LSB4) << 4);
   //GPIO_PORTD_DATA_R &= 0x7F;        // Select write
+  for( i=0; i<1000; i++ );
   GPIO_PORTD_DATA_R |= LCD_RS;        // Select data mode
+  for( i=0; i<1000; i++ );
   GPIO_PORTD_DATA_R |= LCD_E;		// Set E High
+  for( i=0; i<1000; i++ );
   GPIO_PORTD_DATA_R &= ~LCD_E;		// Set E Low
 }
 
