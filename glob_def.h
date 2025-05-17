@@ -26,6 +26,7 @@
 
 #define FALSE	0
 #define TRUE  !FALSE
+#define RESET   0
 //#define NULL	((void *)0)
 //#define NEGATIVE 0
 //#define POSITIVE 1

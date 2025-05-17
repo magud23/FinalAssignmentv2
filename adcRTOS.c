@@ -6,6 +6,7 @@
 #include "tm4c123gh6pm.h"
 #include "emp_type.h"
 #include "FreeRTOS.h"
+#include "glob_def.h"
 #include "Task.h"
 #include "queue.h"
 
@@ -38,7 +39,7 @@ init_adc()
   ADC0_SSPRI_R = 0x00000123;
 
   //Disable all sequencers
-  ADC0_ACTSS_R = 0;
+  ADC0_ACTSS_R = RESET;
 
   // Trigger for Sequencer 3 (bit 12-15) = 0xF = Always.
   ADC0_EMUX_R = 0x0000F000;
@@ -59,7 +60,7 @@ init_adc()
 
 INT16U get_adc()
 {
-    INT16U adc_val = 0;
+    INT16U adc_val = RESET;
     xQueuePeek(adc_q, &adc_val,0);
     return adc_val;
 }

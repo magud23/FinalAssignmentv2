@@ -34,7 +34,7 @@
 
 /*****************************   Functions   *******************************/
 
-BaseType_t get_encoder_pos(INT8U * p_val);
+BaseType_t get_encoder_pos(INT16S * p_val);
 /*****************************************************************
 * Input: pointer in which to put the value returned from shared memory
 * Output: success/fail of operation

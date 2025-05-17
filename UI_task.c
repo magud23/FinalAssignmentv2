@@ -1,49 +1,5 @@
-/*****************************************************************************
- * University of Southern Denmark
- * Embedded C Programming (ECP)
- *
- * MODULENAME.: leds.c
- *
- * PROJECT....: ECP
- *
- * DESCRIPTION: See module specification file (.h-file).
- *
- * Change Log:
- ******************************************************************************
- * Date    Id    Change
- * YYMMDD
- * --------------------
- * 050128  KA    Module created.
- *
- *****************************************************************************/
-
-/***************************** Include files *******************************/
-#include <stdint.h>
-#include "tm4c123gh6pm.h"
-#include "emp_type.h"
-
-#include "FreeRTOS.h"
-#include "adcRTOS.h"
-#include "Task.h"
-#include "queue.h"
-#include "semphr.h"
+/****************************     Header     ******************************/
 #include "UI_task.h"
-#include "encoder.h"
-#include "lcd.h"
-#include "elevator.h"
-#include "password.h"
-#include "glob_def.h"
-
-
-/*****************************    Defines    *******************************/
-#define PF0     0       // Bit 0
-#define setup_state   0
-#define scale_state   1
-#define offset_state  2
-/*****************************   Constants   *******************************/
-
-/*****************************   Variables   *******************************/
-QueueHandle_t ui_mode_q;
 
 /*****************************   Functions   *******************************/
 
@@ -96,10 +52,11 @@ void UI_task(void *pvParameters)
 
     INT8U ui_mode = UI_IDLE;
     BOOLEAN first_time = TRUE;
-    INT8U previous_floor = 0;
-    INT8U dest_floor = 0;
-    INT8U current_floor = 0;
-    INT8U password_len = 0;
+    INT8U password_len = RESET;
+    INT8U previous_floor = RESET;
+    INT8U dest_floor = RESET;
+    INT8U current_floor = RESET;
+
 
 
     while(1)
@@ -158,7 +115,7 @@ void UI_task(void *pvParameters)
             {
                 wr_ch_LCD(0xff); //clear and home display
                 wr_str_LCD("TURN ENCODER");
-                first_time = 0;
+                first_time = RESET;
             }
             move_LCD(0,1);
             wr_str_LCD("                ");
@@ -190,12 +147,13 @@ void UI_task(void *pvParameters)
             {
                 wr_ch_LCD(0xff); //clear and home display
                 wr_str_LCD("TYPE PIN THEN #");
-                first_time = 0;
+                first_time = RESET;
             }
 
             // update number on second line
             move_LCD(0,1);
             get_typed_pass_length(&password_len);
+
             int i;
             for (i=0; i<PASS_LENGTH; i++)
             {
