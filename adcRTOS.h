@@ -38,12 +38,23 @@ QueueHandle_t adc_q;
 
 /*****************************   Functions   *******************************/
 
-INT16U get_adc();
+
+
+BaseType_t get_pot(INT16U *p_adc_val);
 /*****************************************************************************
- *   Input    : -
- *   Output   : -
- *   Function : Test function
- ******************************************************************************/
+*   Input    : Pointer to value to change to value from ADC
+*   Output   : succes of operation
+*   Function : Gets reading of ADC via shared memory
+******************************************************************************/
+
+
+BaseType_t set_pot(INT16U *p_adc_val);
+/*****************************************************************************
+*   Input    : Pointer to value to put to shared memory
+*   Output   : succes of operation
+*   Function : Sets reading of ADC via shared memory
+******************************************************************************/
+
 
 void init_adc();
 /*****************************************************************************
